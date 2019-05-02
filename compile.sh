@@ -16,9 +16,9 @@ mv *.o ../compiledTmp
 
 cd ../compiledTmp
 
-gcc -Wall -o arch-2018 $(ls)
+gcc -Wall -o pqnn64 $(ls)
 
 rm -f ../compiled/*
 mv * ../compiled
 cd ../compiled
-./arch-2018
+./pqnn64
