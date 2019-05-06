@@ -1,24 +1,24 @@
 /**************************************************************************************
- * 
+ *
  * CdL Magistrale in Ingegneria Informatica
  * Corso di Architetture e Programmazione dei Sistemi di Elaborazione - a.a. 2018/19
- * 
+ *
  * Progetto dell'algoritmo di Product Quantization for Nearest Neighbor Search
  * in linguaggio assembly x86-32 + SSE
- * 
+ *
  * Fabrizio Angiulli, aprile 2019
- * 
+ *
  **************************************************************************************/
 
 /*
- 
+
  Software necessario per l'esecuzione:
 
      NASM (www.nasm.us)
      GCC (gcc.gnu.org)
 
- entrambi sono disponibili come pacchetti software 
- installabili mediante il packaging tool del sistema 
+ entrambi sono disponibili come pacchetti software
+ installabili mediante il packaging tool del sistema
  operativo; per esempio, su Ubuntu, mediante i comandi:
 
      sudo apt-get install nasm
@@ -32,9 +32,9 @@
  Per generare il file eseguibile:
 
  nasm -f elf32 pqnn32.nasm && gcc -O0 -m32 -msse pqnn32.o pqnn32c.c -o pqnn32c && ./pqnn32c
- 
+
  oppure
- 
+
  ./runpqnn32
 
 */
@@ -53,7 +53,7 @@
 
 typedef struct {
 	char* filename; //
-	MATRIX ds; // data set 
+	MATRIX ds; // data set
 	MATRIX qs; // query set
 	int n; // numero di punti del data set
 	int d; // numero di dimensioni del data/query set
@@ -64,7 +64,7 @@ typedef struct {
 	int kc; // numero di centroidi del quantizzatore coarse
 	int w; // numero di centroidi del quantizzatore coarse da selezionare per la ricerca non esaustiva
 	int nr; // dimensione del campione dei residui nel caso di ricerca non esaustiva
-	float eps; // 
+	float eps; //
 	int tmin; //
 	int tmax; //
 	int exaustive; // tipo di ricerca: (0=)non esaustiva o (1=)esaustiva
@@ -74,7 +74,7 @@ typedef struct {
 	// nns: matrice row major order di interi a 32 bit utilizzata per memorizzare gli ANN
 	// sulla riga i-esima si trovano gli ID (a partire da 0) degli ANN della query i-esima
 	//
-	int* ANN; 
+	int* ANN;
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -86,26 +86,26 @@ typedef struct {
 
 
 /*
- * 
- *	Le funzioni sono state scritte assumento che le matrici siano memorizzate 
+ *
+ *	Le funzioni sono state scritte assumento che le matrici siano memorizzate
  * 	mediante un array (float*), in modo da occupare un unico blocco
- * 	di memoria, ma a scelta del candidato possono essere 
+ * 	di memoria, ma a scelta del candidato possono essere
  * 	memorizzate mediante array di array (float**).
- * 
+ *
  * 	In entrambi i casi il candidato dovrà inoltre scegliere se memorizzare le
  * 	matrici per righe (row-major order) o per colonne (column major-order).
  *
  * 	L'assunzione corrente è che le matrici siano in row-major order.
- * 
+ *
  */
 
 
-void* get_block(int size, int elements) { 
-	return _mm_malloc(elements*size,32); 
+void* get_block(int size, int elements) {
+	return _mm_malloc(elements*size,32);
 }
 
 
-void free_block(void* p) { 
+void free_block(void* p) {
 	_mm_free(p);
 }
 
@@ -121,54 +121,54 @@ void dealloc_matrix(MATRIX mat) {
 
 
 /*
- * 
+ *
  * 	load_data
  * 	=========
- * 
+ *
  *	Legge da file una matrice di N righe
  * 	e M colonne e la memorizza in un array lineare in row-major order
- * 
+ *
  * 	Codifica del file:
  * 	primi 4 byte: numero di righe (N) --> numero intero a 32 bit
  * 	successivi 4 byte: numero di colonne (M) --> numero intero a 32 bit
  * 	successivi N*M*4 byte: matrix data in row-major order --> numeri floating-point a precisione doppia
- * 
+ *
  *****************************************************************************
  *	Se lo si ritiene opportuno, è possibile cambiare la codifica in memoria
- * 	della matrice. 
+ * 	della matrice.
  *****************************************************************************
- * 
+ *
  */
-MATRIX load_data(char* filename, int *n, int *d) {	
+MATRIX load_data(char* filename, int *n, int *d) {
 	FILE* fp;
 	int rows, cols, status, i;
-	
+
 	fp = fopen(filename, "rb");
-	
+
 	if (fp == NULL) {
 		printf("'%s' : bad data file name!\n", filename);
 		exit(0);
 	}
-	
+
 	status = fread(&cols, sizeof(int), 1, fp);
 	status = fread(&rows, sizeof(int), 1, fp);
-		
+
 	MATRIX data = alloc_matrix(rows,cols);
 	status = fread(data, sizeof(double), rows*cols, fp);
 	fclose(fp);
-	
+
 	*n = rows;
 	*d = cols;
-	
+
 	return data;
 }
 
 
-void save_ANN(char* filename, int* ANN, int nq, int knn) {	
+void save_ANN(char* filename, int* ANN, int nq, int knn) {
 	FILE* fp;
 	int i, j;
 	char fpath[256];
-	
+
 	sprintf(fpath, "%s.ann", filename);
 	fp = fopen(fpath, "w");
 	for (i = 0; i < nq; i++) {
@@ -189,11 +189,12 @@ extern int* pqnn64_search(params* input);
  * 	==========
  */
 void pqnn_index(params* input) {
-	
+
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
+		//
     // -------------------------------------------------
-    
+
     pqnn64_index(input); // Chiamata funzione assembly
 
     // -------------------------------------------------
@@ -205,12 +206,13 @@ void pqnn_index(params* input) {
  *	pqnn_search
  * 	===========
  */
+void search(params* input);
 void pqnn_search(params* input) {
-	
+	  search(input);
     // -------------------------------------------------
     // Codificare qui l'algoritmo di interrogazione
     // -------------------------------------------------
-    
+
     pqnn64_search(input); // Chiamata funzione assembly
 
 	// Restituisce il risultato come una matrice di nq * knn
@@ -222,10 +224,10 @@ void pqnn_search(params* input) {
 
 
 int main(int argc, char** argv) {
-	
+
 	char fname[256];
 	int i, j;
-	
+
 	//
 	// Imposta i valori di default dei parametri
 	//
@@ -348,7 +350,7 @@ int main(int argc, char** argv) {
 		} else
 			par++;
 	}
-	
+
 	//
 	// Visualizza la sintassi del passaggio dei parametri da riga comandi
 	//
@@ -368,19 +370,19 @@ int main(int argc, char** argv) {
 		printf("\t-tmax: max k-means iterations\n");
 		printf("\n");
 	}
-	
+
 	//
 	// Legge il data set ed il query set
 	//
-	
+
 	if (input->filename == NULL || strlen(input->filename) == 0) {
 		printf("Missing input file name!\n");
 		exit(1);
 	}
-	
+
 	sprintf(fname, "%s.ds", input->filename);
 	input->ds = load_data(fname, &input->n, &input->d);
-	
+
 	input->nr = input->n/20;
 
 	sprintf(fname, "%s.qs", input->filename);
@@ -389,7 +391,7 @@ int main(int argc, char** argv) {
 	//
 	// Visualizza il valore dei parametri
 	//
-	
+
 	if (!input->silent) {
 		printf("Input file name: '%s'\n", input->filename);
 		printf("Data set size [n]: %d\n", input->n);
@@ -405,15 +407,15 @@ int main(int argc, char** argv) {
 		}
 		printf("K-means parameters: eps = %.4f, tmin = %d, tmax = %d\n", input->eps, input->tmin, input->tmax);
 	}
-	
+
 	//
 	// Costruisce i quantizzatori
 	//
-	
+
 	clock_t t = clock();
 	pqnn_index(input);
 	t = clock() - t;
-	
+
 	if (!input->silent)
 		printf("\nIndexing time = %.3f secs\n", ((float)t)/CLOCKS_PER_SEC);
 	else
@@ -422,22 +424,22 @@ int main(int argc, char** argv) {
 	//
 	// Determina gli ANN
 	//
-	
+
 	input->ANN = calloc(input->nq*input->knn,sizeof(int));
 
 	t = clock();
 	pqnn_search(input);
 	t = clock() - t;
-	
+
 	if (!input->silent)
 		printf("\nSearching time = %.3f secs\n", ((float)t)/CLOCKS_PER_SEC);
 	else
 		printf("%.3f\n", ((float)t)/CLOCKS_PER_SEC);
-	
+
 	//
 	// Salva gli ANN
 	//
-	
+
  	if (input->ANN != NULL)
  	{
  		if (!input->silent && input->display) {
@@ -451,7 +453,7 @@ int main(int argc, char** argv) {
  		}
  		save_ANN(input->filename, input->ANN, input->nq, input->knn);
 	}
-	
+
 	if (!input->silent)
 		printf("\nDone.\n");
 

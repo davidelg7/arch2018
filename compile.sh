@@ -21,4 +21,4 @@ gcc -Wall -o pqnn64 $(ls)
 rm -f ../compiled/*
 mv * ../compiled
 cd ../compiled
-./pqnn64
+./pqnn64 ../ds/prova
