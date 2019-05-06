@@ -1,4 +1,4 @@
-cd /home/"$USER"/Google/Architettura/compiledTmp
+cd $(dirname "$0")/compiledTmp
 rm -f *
 cd ../nasm
 
