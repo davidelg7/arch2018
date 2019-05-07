@@ -46,10 +46,8 @@
 #include <time.h>
 #include <xmmintrin.h>
 
-
-#define	MATRIX		double*
+#define	MATRIX		float*
 #define	VECTOR		double*
-
 
 typedef struct {
 	char* filename; //
@@ -75,6 +73,7 @@ typedef struct {
 	// sulla riga i-esima si trovano gli ID (a partire da 0) degli ANN della query i-esima
 	//
 	int* ANN;
+	MATRIX quant;
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -83,6 +82,11 @@ typedef struct {
 	// ...
 	//
 } params;
+
+
+
+
+
 
 
 /*
@@ -188,8 +192,9 @@ extern int* pqnn64_search(params* input);
  *	pqnn_index
  * 	==========
  */
+void k_means(params* input);
 void pqnn_index(params* input) {
-
+		k_means(input);
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
 		//
@@ -206,9 +211,7 @@ void pqnn_index(params* input) {
  *	pqnn_search
  * 	===========
  */
-void search(params* input);
 void pqnn_search(params* input) {
-	  search(input);
     // -------------------------------------------------
     // Codificare qui l'algoritmo di interrogazione
     // -------------------------------------------------
@@ -221,7 +224,7 @@ void pqnn_search(params* input) {
     // -------------------------------------------------
 
 }
-
+void printMatrix(params* input);
 
 int main(int argc, char** argv) {
 
@@ -458,4 +461,20 @@ int main(int argc, char** argv) {
 		printf("\nDone.\n");
 
 	return 0;
+
+}
+void printMatrix(params* input){
+ FILE *fp;
+
+char*filename="dataset.csv";
+
+fp=fopen(filename,"w+");
+
+for (int i = 0; i < input->n; i++) {
+	for(int j=0;j<input->d;j++)
+		fprintf(fp,"%1.1f,",input->ds[i*input->d+j] );
+		fprintf(fp,"\n");
+	}
+fclose(fp);
+printf("\n %sfile created",filename);
 }

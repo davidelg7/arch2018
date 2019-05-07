@@ -1,8 +1,7 @@
 #include <stdio.h>
-
-#define	MATRIX		double*
+#include <stdlib.h>
+#define	MATRIX		float*
 #define	VECTOR		double*
-
 
 typedef struct {
 	char* filename; //
@@ -28,6 +27,7 @@ typedef struct {
 	// sulla riga i-esima si trovano gli ID (a partire da 0) degli ANN della query i-esima
 	//
 	int* ANN;
+	MATRIX quant;
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -36,14 +36,42 @@ typedef struct {
 	// ...
 	//
 } params;
+float* mediaG(params* input,int group);
+float dist(params* input, int group,int x1,int x2);
+void sub_k_means(params* input,int group);
+//calcola i k centroidi attraverso  k_means
+//una chiamata a sub_k_means li calcola per ogni gruppo 0<=i<=m
+void k_means(params* input){
+	// dimensione matrice quant:
+	// k:numero di centroidi per gruppo
+	//m:numero di gruppi
+	//d:numero di dimensioni di un punto del dataset
+	// punti necessari: k*m*d/m-> k*d
+	input->quant=malloc(input->k*input->d*sizeof(float));
+	for(int i=0;i<input->m;i++){
+			sub_k_means(input,i);
+	}
+	for(int i=0;i<1;i++){
+		for(int j=0;j<input->k;j++){
+			for(int m=0;m<(input->d/input->m);m++){
+			printf("%1.1f ",input->quant[i*input->k+j+m]);
+		}
+			printf("\n");
 
-void search(params* input){
-  int limR=input->nq;
-  int limC=input->d;
-  for(int i=0;i<limR;i++){
-    for(int j=0;j<limC;j++)
-      printf("%.0f,",input->qs[i*j+j]);
-    printf("\n");
+		}
+		printf("\n ");
 
-  }
+}
+}
+//calcola i k centroidi relativi all'i-esimo gruppo
+void sub_k_means(params* input,int group){
+	//selezione dei numeri casuali
+	for(int i=0;i<input->k;i++){
+		int rnd=rand() % input->n;
+		input->quant[group*input->k+i]=input->ds[rnd];
+	}
+
+
+
+
 }
