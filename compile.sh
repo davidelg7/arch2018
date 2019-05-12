@@ -16,7 +16,7 @@ mv *.o ../compiledTmp
 
 cd ../compiledTmp
 
-gcc -Wall -o pqnn64 $(ls)
+gcc -Wall -o pqnn64 $(ls) -lm
 
 rm -f ../compiled/*
 mv * ../compiled
