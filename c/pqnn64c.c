@@ -156,7 +156,7 @@ MATRIX load_data(char* filename, int *n, int *d) {
 
 	status = fread(&cols, sizeof(int), 1, fp);
 	status = fread(&rows, sizeof(int), 1, fp);
-
+	//HO MODIFICATO ROWS CON COLS
 	MATRIX data = alloc_matrix(rows,cols);
 	status = fread(data, sizeof(double), rows*cols, fp);
 	fclose(fp);
@@ -192,6 +192,8 @@ extern int* pqnn64_search(params* input);
  *	pqnn_index
  * 	==========
  */
+void writeQuery(char* filename);
+void writeDataset(char* filename);
 void k_means(params* input);
 void pqnn_index(params* input) {
 		k_means(input);
@@ -394,7 +396,6 @@ int main(int argc, char** argv) {
 	//
 	// Visualizza il valore dei parametri
 	//
-
 	if (!input->silent) {
 		printf("Input file name: '%s'\n", input->filename);
 		printf("Data set size [n]: %d\n", input->n);
@@ -414,6 +415,7 @@ int main(int argc, char** argv) {
 	//
 	// Costruisce i quantizzatori
 	//
+	//printMatrix(input);
 
 	clock_t t = clock();
 	pqnn_index(input);
@@ -464,17 +466,13 @@ int main(int argc, char** argv) {
 
 }
 void printMatrix(params* input){
- FILE *fp;
-
-char*filename="dataset.csv";
-
-fp=fopen(filename,"w+");
 
 for (int i = 0; i < input->n; i++) {
-	for(int j=0;j<input->d;j++)
-		fprintf(fp,"%1.1f,",input->ds[i*input->d+j] );
-		fprintf(fp,"\n");
+	for(int j=0;j<input->d;j++){
+		if(j!=0&&j%(input->d/input->m)==0)
+		printf("\t" );
+		printf("%1.1f,\t",input->ds[i*input->d+j] );
 	}
-fclose(fp);
-printf("\n %sfile created",filename);
+		printf("\n");
+	}
 }
