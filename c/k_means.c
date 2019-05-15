@@ -174,7 +174,7 @@ float* mediaGeometrica(params* input,int group){
 			int i1=i*input->m+group;
 
 			for(int m=0;m<input->d/input->m;m++)
-				media[i*input->d/input->m+m]=
+				media[i*dm+m]=
 				input->quant[i*input->d+group*dm+m];
 }
 
