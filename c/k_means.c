@@ -98,20 +98,23 @@ void updateNN(params* input,int group){
 		MATRIX centroidi= input->quant;
 		MAP map= input->map;
 		float* dis= malloc(input->k*sizeof(float));
-
+		int dm= (int)input->d/input->m;
 		for(int i=0;i<input->n;i++){
+			int i1=i*input->d+group*dm;
+			int min=0;
 			for(int j=0;j<input->k;j++) {
+				int j1=j*input->d+group*dm;
 				dis[j]=0;
 				for(int k=0;k<input->d/input->m;k++)
-					dis[j]+=(ds[i*input->d+group*input->d/input->m+k]-centroidi[j*input->d+group*input->d/input->m+k])*
-						(ds[i*input->d+group*input->d/input->m+k]-centroidi[j*input->d+group*input->d/input->m+k]);
+					dis[j]+=(ds[i1+k]-centroidi[j1+k])*
+						(ds[i1+k]-centroidi[j1+k]);
 				dis[j]=sqrtf(dis[j]);
-			}
-			int min=0;
-			for(int j=0;j<input->k;j++)
 				if(dis[min]>dis[j])
 					min=j;
-			map[i*input->m+group]=min;
+				map[i*input->m+group]=min;
+
+			}
+
 		}
 		free(dis);
 }
@@ -119,15 +122,16 @@ float calcolaDifferenza(params* input,int group,float* newCentroid){
 		float diff=0;
 		float tot=0;
 		MATRIX q=input->quant;
-		int d=input->d;
-		int m=input->m;
+		int dm=input->d/input->m;
 		//per ogni centroide
 		for(int i=0;i<input->k;i++){
 			diff=0;
+			int i1=i*input->d+group*dm;
+			int i2=i*dm;
 			//per ogni componente del centroide i
-			for(int j=0;j<input->d/input->m;j++){
+			for(int j=0;j<dm;j++){
 				//eleva al quadrato la differenza delle componenti
-				diff+=(q[i*d+group*d/m+j]-newCentroid[i*d/m+j])*(q[i*d+group*d/m+j]-newCentroid[i*d/m+j]);
+				diff+=(q[i1+j]-newCentroid[i2+j])*(q[i1+j]-newCentroid[i2+j]);
 			}
 			tot+=sqrtf(diff);
 		}
@@ -144,10 +148,12 @@ void stampaVettore(MATRIX f ,int step,int dim){
 }
 
 void updateCentroids(params* input,int group,float* newCentroids){
-
+	int dm= input->d/input->m;
 		for(int i=0;i<input->k;i++){
+			int i1=i*input->d+group*dm;
+			int i2=i*dm;
 			for(int j=0;j<input->d/input->m;j++)
-					input->quant[i*input->d+group*input->d/input->m+j]=newCentroids[i*input->d/input->m+j];
+					input->quant[i1+j]=newCentroids[i2+j];
 		}
 }
 
@@ -159,29 +165,33 @@ float* mediaGeometrica(params* input,int group){
  	float* media= malloc((input->k*(input->d/input->m))*sizeof(float));
 	MAP map= input->map;
 	int*occ=malloc(input->k*sizeof(int));
+	int dm=(int)input->d/input->m;
 
 	for(int i=0;i<input->k;i++)
 		occ[i]=1;
 
-		for(int i=0; i<input->k;i++)
+		for(int i=0; i<input->k;i++) {
+			int i1=i*input->m+group;
+
 			for(int m=0;m<input->d/input->m;m++)
 				media[i*input->d/input->m+m]=
-				input->quant[i*input->d+group*input->d/input->m+m];
-
+				input->quant[i*input->d+group*dm+m];
+}
 
 	for(int i=0; i<input->n;i++){
+		int i1=i*input->m+group;
 		for(int m=0;m<input->d/input->m;m++){
-			media[map[i*input->m+group]*input->d/input->m+m]+=
-			input->ds[i*input->d+group*input->d/input->m+m];
+			media[map[i1]*dm+m]+=
+			input->ds[i1*dm+m];
 		}
-		occ[map[i*input->m+group]]++;
+		occ[map[i1]]++;
 		// printf("Centroide %d mappa %d nel gruppo %d, dopo aggiornamento vale %d \n",map[i*input->m+group],i,group,occ[map[i*input->m+group]]);
 	}
 	for(int i=0;i<input->k;i++){
 	// 	if(occ[i]==0)
 	// 		printf("Centroide %d zero occorrenze\n",i );
 		for(int j=0;j<input->d/input->m;j++)
-			media[i*input->d/input->m+j]/=occ[i];
+			media[i*dm+j]/=occ[i];
  }
  free(occ);
 return media;
@@ -284,9 +294,9 @@ void k_means(params* input){
 //	stampaCentroidi(input);
 	for(int i=0;i<input->m;i++)
 			sub_k_means(input,i);
-	 // stampaCentroidi(input);
-	  stampaMappa(input);
-	 stampaQuantiMappatiPerOgniCentroide(input);
+	  stampaCentroidi(input);
+	 // stampaMappa(input);
+	// stampaQuantiMappatiPerOgniCentroide(input);
 	}
 //calcola i k centroidi casuali relativi al gruppo group
 void select_random_centroid(params* input){
