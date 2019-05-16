@@ -192,11 +192,13 @@ extern int* pqnn64_search(params* input);
  *	pqnn_index
  * 	==========
  */
+void printMatrix(params* input);
 void writeQuery(char* filename);
 void writeDataset(char* filename);
 void k_means(params* input);
 void pqnn_index(params* input) {
 		k_means(input);
+
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
 		//
@@ -380,6 +382,8 @@ int main(int argc, char** argv) {
 	// Legge il data set ed il query set
 	//
 
+	// writeDataset("Test");
+	// writeQuery("Test");
 	if (input->filename == NULL || strlen(input->filename) == 0) {
 		printf("Missing input file name!\n");
 		exit(1);
@@ -392,7 +396,7 @@ int main(int argc, char** argv) {
 
 	sprintf(fname, "%s.qs", input->filename);
 	input->qs = load_data(fname, &input->nq, &input->d);
-
+	printMatrix(input);
 	//
 	// Visualizza il valore dei parametri
 	//
@@ -468,10 +472,10 @@ int main(int argc, char** argv) {
 void printMatrix(params* input){
 
 for (int i = 0; i < input->n; i++) {
-	for(int j=0;j<input->d;j++){
-		if(j!=0&&j%(input->d/input->m)==0)
-		printf("\t" );
-		printf("%1.1f,\t",input->ds[i*input->d+j] );
+	for(int j=0;j<input->m;j++){
+		for(int m=0;m<input->d/input->m;m++)
+			printf("%1.1f,\t",input->ds[i*input->d+j*input->d/input->m+m] );
+			printf("\n");
 	}
 		printf("\n");
 	}

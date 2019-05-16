@@ -46,6 +46,34 @@ typedef struct {
 int getCentroidIndex(params* input,int group,int c,int v){
 	return c*input->d+input->d/input->m*group+v;
 }
+void writeCentroid(params* input,int group, int passo) {
+
+
+	for(int j=0;j<input->k;j++){
+		FILE* fp;
+		char buf[256];
+		snprintf(buf, sizeof buf, "../csv/p %d c %d g %d.csv",passo,j,group);
+		fp = fopen(buf, "w+");
+		fprintf(fp,"%s,","x");
+		fprintf(fp,"%s,\n","y");
+
+			for(int m=0;m<input->d/input->m;m++){
+				fprintf(fp,"%f,",input->quant[j*input->d+group*input->d/input->m+m]);
+			}
+			fprintf(fp,"\n");
+			for(int p=0;p<input->n;p++){
+				if(input->map[p*input->m+group]==j){
+					for(int m=0;m<(input->d/input->m);m++){
+						fprintf(fp,"%f,",input->ds[p*input->d+group*input->d/input->m+m]);
+					}
+					fprintf(fp,"\n");
+
+				}
+			}
+			fclose(fp);
+
+		}
+}
 //gruppo group
 //i riga
 //v componente della riga
@@ -69,12 +97,7 @@ void stampaMappa(params* input){
 	MAP map=input->map;
 	for(int i=0;i<input->n;i++){
 		for(int j=0;j<1;j++){
-			// printf("[");
-			// for(int k=0;k<input->d/input->m;k++)
-			// 	printf("%1.1f ,",input->ds[getDatasetIndex(input,j,i,k)]);
-			// 	printf("]");t->
 			printf("[%d,%d]->%d  ",i,j,map[i*input->m+j]);
-
 }
 		printf("\n");
 
@@ -292,9 +315,9 @@ void k_means(params* input){
 	// stampaMappa(input);
 
 //	stampaCentroidi(input);
-	for(int i=0;i<input->m;i++)
+	for(int i=0;i<input->m;i++){
 			sub_k_means(input,i);
-	  stampaCentroidi(input);
+		}
 	 // stampaMappa(input);
 	// stampaQuantiMappatiPerOgniCentroide(input);
 	}
@@ -321,10 +344,12 @@ void sub_k_means(params* input,int group){
 	for(int i=0;i<input->tmin;i++){
 		updateNN(input,group);
 	 	float* newCentroids=mediaGeometrica(input,group);
-
 		float increment=calcolaDifferenza(input,group,newCentroids);
 		 printf("Al passo %d i centroidi sono stati spostati di un totale di %1.3f\n",i, increment);
+		 // writeCentroid(input,group,i);
+
 		updateCentroids(input,group,newCentroids);
+	//	stampaCentroidi(input);
 		free(newCentroids);
 	}
 	updateNN(input,group);
