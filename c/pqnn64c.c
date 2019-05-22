@@ -47,7 +47,8 @@
 #include <xmmintrin.h>
 
 #define	MATRIX		float*
-#define	VECTOR		double*
+#define	VECTOR		int*
+#define MAP 			int*
 
 typedef struct {
 	char* filename; //
@@ -74,6 +75,9 @@ typedef struct {
 	//
 	int* ANN;
 	MATRIX quant;
+	MAP map;
+	MATRIX dis;
+	MATRIX res;
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -192,12 +196,14 @@ extern int* pqnn64_search(params* input);
  *	pqnn_index
  * 	==========
  */
+void popolaANN(params* input);
 void printMatrix(params* input);
 void writeQuery(char* filename);
 void writeDataset(char* filename);
 void k_means(params* input);
 void pqnn_index(params* input) {
 		k_means(input);
+		printf("K-MEANS ESEGUITO\n");
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
 		//
@@ -214,11 +220,12 @@ void pqnn_index(params* input) {
  *	pqnn_search
  * 	===========
  */
+
 void pqnn_search(params* input) {
     // -------------------------------------------------
     // Codificare qui l'algoritmo di interrogazione
     // -------------------------------------------------
-
+		popolaANN(input);
     pqnn64_search(input); // Chiamata funzione assembly
 
 	// Restituisce il risultato come una matrice di nq * knn
@@ -380,7 +387,7 @@ int main(int argc, char** argv) {
 	//
 	// Legge il data set ed il query set
 	//
-
+	// printMatrix(input);
 	// writeDataset("Test");
 	// writeQuery("Test");
 	if (input->filename == NULL || strlen(input->filename) == 0) {
@@ -395,7 +402,6 @@ int main(int argc, char** argv) {
 
 	sprintf(fname, "%s.qs", input->filename);
 	input->qs = load_data(fname, &input->nq, &input->d);
-	// printMatrix(input);
 	//
 	// Visualizza il valore dei parametri
 	//
@@ -419,6 +425,8 @@ int main(int argc, char** argv) {
 	// Costruisce i quantizzatori
 	//
 	//printMatrix(input);
+	input->ANN = calloc(input->nq*input->knn,sizeof(int));
+	input->dis= malloc(input->k*input->k*input->m*sizeof(float));
 
 	clock_t t = clock();
 	pqnn_index(input);
@@ -433,7 +441,7 @@ int main(int argc, char** argv) {
 	// Determina gli ANN
 	//
 
-	input->ANN = calloc(input->nq*input->knn,sizeof(int));
+
 
 	t = clock();
 	pqnn_search(input);
@@ -474,7 +482,6 @@ for (int i = 0; i < input->n; i++) {
 	for(int j=0;j<input->m;j++){
 		for(int m=0;m<input->d/input->m;m++)
 			printf("%1.1f,\t",input->ds[i*input->d+j*input->d/input->m+m] );
-			printf("\n");
 	}
 		printf("\n");
 	}

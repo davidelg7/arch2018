@@ -6,12 +6,16 @@
 #include <xmmintrin.h>
 
 
-float qs[2*8] = {  5.4, 5.3,
-                  10, 11
+float qs[2*1] = {  4,4
                 };
+float ds[2*6]={ 1,1,
+                2,1,
+                1,3,
+                4,1,
+                5,3,
+                7,4};
 
-
-void writeDataset(char* filename) {
+void writeRandomDataset(char* filename) {
 printf("Scrivo il dataset\n");
 	FILE* fp;
 	int i, j;
@@ -40,17 +44,36 @@ printf("Scrivo il dataset\n");
 	}
 	fclose(fp);
 }
+void writeDataset(char* filename) {
+printf("Scrivo il dataset\n");
+	FILE* fp;
+	int i, j;
+	char fpath[256];
+
+	sprintf(fpath,"../ds/%s.ds", filename);
+	fp = fopen(fpath, "w+");
+  int r=6;
+  int c =2;
+  int dim=r*c;
+  fwrite( &c, 1, sizeof(int), fp ) ;
+  fwrite( &r, 1, sizeof(int), fp ) ;
+	for (i = 0; i < dim; i++) {
+    fwrite( &ds[i], 1, sizeof(float), fp) ;
+	}
+	fclose(fp);
+}
 void writeQuery(char* filename) {
   printf("Scrivo il queryset\n");
 
 	FILE* fp;
 	int i, j;
 	char fpath[256];
-  int dim=2*2;
 	sprintf(fpath, "../ds/%s.qs", filename);
   fp = fopen(fpath, "w");
-  int r=2;
+  int r=1;
   int c =2;
+  int dim=r*c;
+
   fwrite( &c, 1, sizeof(int), fp ) ;
   fwrite( &r, 1, sizeof(int), fp ) ;
 	for (i = 0; i < dim; i++) {

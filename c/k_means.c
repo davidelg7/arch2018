@@ -52,10 +52,38 @@ int getCentroidIndex(params* input,int group,int c,int v){
 void popolaANN_ES(params* input);
 
 void popolaANN(params* input){
-	if(input->exaustive==1&&input->symmetric==0){
-		printf("Asimmetrica esaustiva\n");
-	//	popolaANN_ES(input);
+	if(input->exaustive==1&&input->symmetric==1){
+		popolaANN_ES(input);
 	}
+}
+//calola la distanza geometrica tra il punto x1 e x2
+//x1 e x2 devono avere la stessa dimensione k
+//x1 appartiene a m1 e x2 appartiene a m2
+float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
+	float d=0;
+		for(int i=0;i<k;i++)
+			d+=(m1[x1+i]-m2[x2+i])*(m1[x1+i]-m2[x2+i]);
+	d=sqrtf(d);
+	return d;
+}
+
+int* quantize(params* input,int q){
+	float* distanze=malloc(input->k*sizeof(float));
+	int* risultato= malloc(input->m*sizeof(int));
+	for(int m=0;m<input->m;m++){
+		for(int i=0;i<input->k;i++){
+			int indiceInizioQuery= q*input->d+m*input->d/input->m;
+			int indiceInizioCentroide=i*input->d+m*input->d/input->m;
+			distanze[i]=dist(input->quant,input->qs,indiceInizioCentroide,indiceInizioQuery,input->d/input->m);
+		}
+		int min=0;
+		for(int j=0;j<input->k;j++)
+			if(distanze[min]>distanze[j])
+				min=j;
+		risultato[m]=min;
+	}
+	free(distanze);
+	return risultato;
 }
 //Popola la struttura ANN inserendoci dentro le posizioni di knn approximated nn del dataset per ogni punto query in Queryset
 void popolaANN_ES(params* input){
@@ -64,19 +92,45 @@ void popolaANN_ES(params* input){
 	//Per ogni punto del queryset
 	for(int i=0;i<input->nq;i++){
 		int*q=quantize(input,i);
-		float*vicini= malloc(input->knn*2*sizeof(float));
+		float*vicini= malloc(input->knn*2*sizeof(float)); //(id,dist)
+		int p=0;
 		for(int x=0;x<input->n;x++){
 			float dx=0;
 			for(int m=0;m<input->m;m++){
 				//avanzo del gruppo
 				int indice=m*k*k;
+				// printf("%d\n",indice);
 				//avanzo del Centroide x
-				indice+=map[x*input->m+m]*k;
+				indice+=input->map[x*input->m+m]*k;
 				//avanzo del centroide mappato da i
 				indice+=q[m];
-				dx+=distanze[indice];
+				dx+=input->dis[indice];
+
+		}
+			dx=sqrtf(dx);
+			//Se ancora non ne ho trovati knn,metto i primi che trovo
+			if(p<input->knn*2){
+				vicini[p]=x;
+				vicini[p+1]=dx;
+				p+=2;
+			}
+			else{
+				int max=0;
+				for(int l=0;l<input->knn*2;l+=2)
+					if(vicini[l+1]>vicini[max+1])
+						max=l;
+				//A questo punto ho la posizione del massimo
+				//posso sostituire il massimo con il corrente dx se la distanza dx è più piccola
+				if(vicini[max+1]>dx)
+					vicini[max]=x;
+					vicini[max+1]=dx;
 			}
 
+		}
+		// Arrivato qui ho controllato tutti i punti e ho in vicini la lista (id,dist) dei knn più vicini a y
+		// e li salvo in ANN
+		for(int s=0;s<input->knn;s++){
+			input->ANN[i*input->knn+s]=(int)vicini[s*2];
 		}
 		free(q);
 		free(vicini);
@@ -122,21 +176,11 @@ int getDatasetIndex(params* input,int group,int i,int v){
 int getMapIndex(params*input,int group,int i){
 	return i*input->m+group;
 }
-//calola la distanza geometrica tra il punto x1 e x2
-//x1 e x2 devono avere la stessa dimensione k
-//x1 appartiene a m1 e x2 appartiene a m2
-float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
-	float d=0;
-		for(int i=0;i<k;i++)
-			d+=(m1[x1+i]-m2[x2+i])*(m1[x1+i]-m2[x2+i]);
-	d=sqrtf(d);
-	return d;
-}
+
 float calcDistMatrix(params*input){
 	int k=input->k;
 	int m= input->m;
 	int d=input->d;
-	input->dis	= malloc(k*k*m*sizeof(float));
 	MATRIX M= input->dis;
 	 //per ogni gruppo
 	 for(int j=0;j<m;j++){
@@ -368,12 +412,13 @@ void k_means(params* input){
 	//stampaCentroidi(input);
 	// stampaMappa(input);
 
-//	stampaCentroidi(input);
 	for(int i=0;i<input->m;i++){
 			sub_k_means(input,i);
 		}
 		calcDistMatrix(input);
 	 // stampaMappa(input);
+	 // stampaCentroidi(input);
+
 	// stampaQuantiMappatiPerOgniCentroide(input);
 	}
 //calcola i k centroidi casuali relativi al gruppo group
