@@ -198,7 +198,6 @@ void writeDataset(char* filename);
 void k_means(params* input);
 void pqnn_index(params* input) {
 		k_means(input);
-
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
 		//
@@ -396,7 +395,7 @@ int main(int argc, char** argv) {
 
 	sprintf(fname, "%s.qs", input->filename);
 	input->qs = load_data(fname, &input->nq, &input->d);
-	printMatrix(input);
+	// printMatrix(input);
 	//
 	// Visualizza il valore dei parametri
 	//

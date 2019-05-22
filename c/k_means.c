@@ -32,6 +32,8 @@ typedef struct {
 	int* ANN;
 	MATRIX quant;
 	MAP map;
+	MATRIX dis;
+	MATRIX res;
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -40,12 +42,49 @@ typedef struct {
 	// ...
 	//
 } params;
+
 //group GRUPPO
 //c Centroide
 //v componente del centroide
 int getCentroidIndex(params* input,int group,int c,int v){
 	return c*input->d+input->d/input->m*group+v;
 }
+void popolaANN_ES(params* input);
+
+void popolaANN(params* input){
+	if(input->exaustive==1&&input->symmetric==0){
+		printf("Asimmetrica esaustiva\n");
+	//	popolaANN_ES(input);
+	}
+}
+//Popola la struttura ANN inserendoci dentro le posizioni di knn approximated nn del dataset per ogni punto query in Queryset
+void popolaANN_ES(params* input){
+	MATRIX distanze=input->dis;
+	int k= input->k;
+	//Per ogni punto del queryset
+	for(int i=0;i<input->nq;i++){
+		int*q=quantize(input,i);
+		float*vicini= malloc(input->knn*2*sizeof(float));
+		for(int x=0;x<input->n;x++){
+			float dx=0;
+			for(int m=0;m<input->m;m++){
+				//avanzo del gruppo
+				int indice=m*k*k;
+				//avanzo del Centroide x
+				indice+=map[x*input->m+m]*k;
+				//avanzo del centroide mappato da i
+				indice+=q[m];
+				dx+=distanze[indice];
+			}
+
+		}
+		free(q);
+		free(vicini);
+	}
+
+
+}
+
 void writeCentroid(params* input,int group, int passo) {
 
 
@@ -93,6 +132,25 @@ float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
 	d=sqrtf(d);
 	return d;
 }
+float calcDistMatrix(params*input){
+	int k=input->k;
+	int m= input->m;
+	int d=input->d;
+	input->dis	= malloc(k*k*m*sizeof(float));
+	MATRIX M= input->dis;
+	 //per ogni gruppo
+	 for(int j=0;j<m;j++){
+		 //per ogni quantizzatore
+		 for(int i=0;i<k;i++){
+			 //Calcola la distanza i centroidi[i,q] del gruppo j e salvala in m
+			 int i1=i*d+j*d/m;
+			 for(int q=0;q<k;q++){
+				 int i2=q*d+j*d/m;
+			 		M[j*k*k+i*k+q]=dist(input->quant,input->quant,i1,i2,d/m);
+			 }
+		 }
+	 }
+}
 void stampaMappa(params* input){
 	MAP map=input->map;
 	for(int i=0;i<input->n;i++){
@@ -100,10 +158,6 @@ void stampaMappa(params* input){
 			printf("[%d,%d]->%d  ",i,j,map[i*input->m+j]);
 }
 		printf("\n");
-
-
-
-
 }
 }
 void sub_k_means(params* input,int group);
@@ -318,6 +372,7 @@ void k_means(params* input){
 	for(int i=0;i<input->m;i++){
 			sub_k_means(input,i);
 		}
+		calcDistMatrix(input);
 	 // stampaMappa(input);
 	// stampaQuantiMappatiPerOgniCentroide(input);
 	}
