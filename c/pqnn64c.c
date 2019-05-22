@@ -203,7 +203,6 @@ void writeDataset(char* filename);
 void k_means(params* input);
 void pqnn_index(params* input) {
 		k_means(input);
-		printf("K-MEANS ESEGUITO\n");
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
 		//

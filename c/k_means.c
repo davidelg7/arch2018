@@ -50,10 +50,17 @@ int getCentroidIndex(params* input,int group,int c,int v){
 	return c*input->d+input->d/input->m*group+v;
 }
 void popolaANN_ES(params* input);
+void popolaANN_EA(params* input);
 
 void popolaANN(params* input){
 	if(input->exaustive==1&&input->symmetric==1){
+		printf("simmetrica\n");
 		popolaANN_ES(input);
+	}
+	else
+	if(input->exaustive==1&&input->symmetric==0){
+		printf("Asimmetrica\n" );
+		popolaANN_EA(input);
 	}
 }
 //calola la distanza geometrica tra il punto x1 e x2
@@ -70,11 +77,12 @@ float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
 int* quantize(params* input,int q){
 	float* distanze=malloc(input->k*sizeof(float));
 	int* risultato= malloc(input->m*sizeof(int));
+	int dm= input->d/input->m;
 	for(int m=0;m<input->m;m++){
+		int indiceInizioQuery= q*input->d+m*dm;
 		for(int i=0;i<input->k;i++){
-			int indiceInizioQuery= q*input->d+m*input->d/input->m;
-			int indiceInizioCentroide=i*input->d+m*input->d/input->m;
-			distanze[i]=dist(input->quant,input->qs,indiceInizioCentroide,indiceInizioQuery,input->d/input->m);
+			int indiceInizioCentroide=i*input->d+m*dm;
+			distanze[i]=dist(input->quant,input->qs,indiceInizioCentroide,indiceInizioQuery,dm);
 		}
 		int min=0;
 		for(int j=0;j<input->k;j++)
@@ -86,9 +94,52 @@ int* quantize(params* input,int q){
 	return risultato;
 }
 //Popola la struttura ANN inserendoci dentro le posizioni di knn approximated nn del dataset per ogni punto query in Queryset
+void popolaANN_EA(params* input){
+	int k= input->k;
+	int dm= input->d/input->m;
+	int d=input->d;
+	//Per ogni punto del queryset
+	for(int i=0;i<input->nq;i++){
+		float*vicini= malloc(input->knn*2*sizeof(float)); //(id,dist)
+		int p=0;
+		for(int x=0;x<input->n;x++){
+			float dx=0;
+			for(int m=0;m<input->m;m++){
+				int centroideX=input->map[x*input->m+m]*d+m*dm;
+				dx=dx+dist(input->quant,input->qs,centroideX,i*d+m*dm,dm);
+		}
+			dx=sqrtf(dx);
+			//Se ancora non ne ho trovati knn,metto i primi che trovo
+			if(p<input->knn*2){
+				vicini[p]=x;
+				vicini[p+1]=dx;
+				p+=2;
+			}
+			else{
+				int max=0;
+				for(int l=0;l<input->knn*2;l+=2)
+					if(vicini[l+1]>vicini[max+1])
+						max=l;
+				//A questo punto ho la posizione del massimo
+				//posso sostituire il massimo con il corrente dx se la distanza dx è più piccola
+				if(vicini[max+1]>dx){
+					vicini[max]=x;
+					vicini[max+1]=dx;}
+			}
+		}
+		// Arrivato qui ho controllato tutti i punti e ho in vicini la lista (id,dist) dei knn più vicini a y
+		// e li salvo in ANN
+		for(int s=0;s<input->knn;s++){
+			input->ANN[i*input->knn+s]=(int)vicini[s*2];
+		}
+		free(vicini);
+	}
+}
+//Popola la struttura ANN inserendoci dentro le posizioni di knn approximated nn del dataset per ogni punto query in Queryset
 void popolaANN_ES(params* input){
 	MATRIX distanze=input->dis;
 	int k= input->k;
+	int dm= input->d/input->m;
 	//Per ogni punto del queryset
 	for(int i=0;i<input->nq;i++){
 		int*q=quantize(input,i);
@@ -440,12 +491,12 @@ float absoluteValue(float r){
 }
 
 void sub_k_means(params* input,int group){
-	 printf("GRUPPO %d\n\n", group);
+	// printf("GRUPPO %d\n\n", group);
 	for(int i=0;i<input->tmin;i++){
 		updateNN(input,group);
 	 	float* newCentroids=mediaGeometrica(input,group);
 		float increment=calcolaDifferenza(input,group,newCentroids);
-		 printf("Al passo %d i centroidi sono stati spostati di un totale di %1.3f\n",i, increment);
+		 //printf("Al passo %d i centroidi sono stati spostati di un totale di %1.3f\n",i, increment);
 		 // writeCentroid(input,group,i);
 
 		updateCentroids(input,group,newCentroids);
@@ -463,7 +514,7 @@ void sub_k_means(params* input,int group){
 			lastIncrement=calcolaDifferenza(input,group,newCentroids);
 			if(absoluteValue(lastIncrement-oldLastIncrement)<input->eps) break;
 			updateCentroids(input,group,newCentroids);
-			printf("Passo %d newIncrement %f\n",max, lastIncrement);
+			//printf("Passo %d newIncrement %f\n",max, lastIncrement);
 			//stampaMappa(input);
 		//	printf("\n");
 		max--;
