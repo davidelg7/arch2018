@@ -104,7 +104,7 @@ void popolaANN_ES(params* input){
 				indice+=input->map[x*input->m+m]*k;
 				//avanzo del centroide mappato da i
 				indice+=q[m];
-				dx+=input->dis[indice];
+				dx=dx+input->dis[indice]*input->dis[indice];
 
 		}
 			dx=sqrtf(dx);
@@ -121,9 +121,9 @@ void popolaANN_ES(params* input){
 						max=l;
 				//A questo punto ho la posizione del massimo
 				//posso sostituire il massimo con il corrente dx se la distanza dx è più piccola
-				if(vicini[max+1]>dx)
+				if(vicini[max+1]>dx){
 					vicini[max]=x;
-					vicini[max+1]=dx;
+					vicini[max+1]=dx;}
 			}
 
 		}
