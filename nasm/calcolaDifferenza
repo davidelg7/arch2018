@@ -1,0 +1,22 @@
+%include "sseutils64.nasm"
+section .data
+  sedici dd 4
+section .text
+
+global calcolaDifferenzaVect
+
+calcolaDifferenzaVect :
+
+push		rbp				; salva il Base Pointer
+mov		rbp, rsp			; il Base Pointer punta al Record di Attivazione corrente
+pushaq						; salva i registri generali
+
+
+
+
+
+
+popaq						; ripristina i registri generali
+mov		rsp, rbp			; ripristina lo Stack Pointer
+pop		rbp				; ripristina il Base Pointer
+ret

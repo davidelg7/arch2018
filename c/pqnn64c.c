@@ -424,8 +424,8 @@ int main(int argc, char** argv) {
 	// Costruisce i quantizzatori
 	//
 	//printMatrix(input);
-	input->ANN = calloc(input->nq*input->knn,sizeof(int));
-	input->dis= malloc(input->k*input->k*input->m*sizeof(float));
+	input->ANN = (MAP) get_block(input->nq*input->knn,sizeof(int));
+	input->dis=malloc(input->m*input->k*input->k*sizeof(float));//alloc_matrix(input->m,input->k*input->k);
 
 	clock_t t = clock();
 	pqnn_index(input);

@@ -1,6 +1,6 @@
 ; --------------------------------------------------
 ; Macro per il linking di file oggetto
-; NASM a 64-bit con la C standard library e 
+; NASM a 64-bit con la C standard library e
 ; alcune utility per l'uso di SSE e AVX
 ;
 ; Uso:
@@ -15,7 +15,7 @@ extern	printf
 
 section	.bss
 
-align 32
+align 16
 dbuf:	resq	1
 
 section	.data
