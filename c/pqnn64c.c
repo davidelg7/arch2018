@@ -73,11 +73,11 @@ typedef struct {
 	// nns: matrice row major order di interi a 32 bit utilizzata per memorizzare gli ANN
 	// sulla riga i-esima si trovano gli ID (a partire da 0) degli ANN della query i-esima
 	//
-	int* ANN;
+	MAP ANN;
 	MATRIX quant;
 	MAP map;
 	MATRIX dis;
-	MATRIX res;
+
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -196,7 +196,7 @@ extern int* pqnn64_search(params* input);
  *	pqnn_index
  * 	==========
  */
-void popolaANN(params* input);
+void popolaANN(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, int nq,int d, int m, int k,int knn, int exaustive, int symmetric);
 void printMatrix(params* input);
 void writeQuery(char* filename);
 void writeDataset(char* filename);
@@ -236,7 +236,8 @@ void pqnn_search(params* input) {
     // -------------------------------------------------
     // Codificare qui l'algoritmo di interrogazione
     // -------------------------------------------------
-		popolaANN(input);
+		popolaANN(input->qs,input-> quant,input->ANN,input-> map,input-> dis,input-> n, input-> nq,input-> d, input-> m, input-> k,input-> knn, input-> exaustive, input-> symmetric);
+
     pqnn64_search(input); // Chiamata funzione assembly
 
 	// Restituisce il risultato come una matrice di nq * knn
@@ -437,9 +438,10 @@ int main(int argc, char** argv) {
 	//
 	//printMatrix(input);
 	input->ANN = (MAP) get_block(input->nq*input->knn,sizeof(int));
-	input->dis=malloc(input->m*input->k*input->k*sizeof(float));//alloc_matrix(input->m,input->k*input->k);
-	input->quant=get_block(sizeof(float), input->k*input->d);
-	input->map=get_block(sizeof(int), input->n*input->m);
+	input->dis=(MATRIX)get_block(sizeof(float),input->m*input->k*input->k);//alloc_matrix(input->m,input->k*input->k);
+	input->quant=(MATRIX)get_block(sizeof(float), input->k*input->d);
+	input->map=(MAP)get_block(sizeof(int), input->n*input->m);
+
 	clock_t t = clock();
 	pqnn_index(input);
 	t = clock() - t;

@@ -29,7 +29,7 @@ typedef struct {
 	// nns: matrice row major order di interi a 32 bit utilizzata per memorizzare gli ANN
 	// sulla riga i-esima si trovano gli ID (a partire da 0) degli ANN della query i-esima
 	//
-	int* ANN;
+	MAP ANN;
 	MATRIX quant;
 	MAP map;
 	MATRIX dis;
@@ -47,9 +47,6 @@ void free_block(void* p);
 //group GRUPPO
 //c Centroide
 //v componente del centroide
-int getCentroidIndex(params* input,int group,int c,int v){
-	return c*input->d+input->d/input->m*group+v;
-}
 extern float dista(MATRIX m1, MATRIX m2, int x1, int x2, int k);
 // calola la distanza geometrica tra il punto x1 e x2
 // x1 e x2 devono avere la stessa dimensione k
@@ -102,14 +99,6 @@ void stampaMappa(params* input){
 }
 void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int group, int tmin,int tmax, float eps);
 void select_random_centroid(MATRIX ds,MATRIX centroids, int n, int d, int m, int k);
-void printCentroids(params*input, int group){
-	for(int i=0;i<input->k;i++){
-		printf("%d-> ",i);
-		for(int j=0;j<input->d/input->m;j++)
-			printf("%1.1f  ",input->quant[getCentroidIndex(input,group,i,j)]);
-		printf("\n" );
-	}
-}
 
  //Aggiorna gli ann in map relativi al gruppo group servendosi dei centroidi
 void updateNN(MATRIX ds,MATRIX centroids, MAP map,int n, int d, int m, int k, int group){
@@ -218,19 +207,7 @@ float* mediaGeometrica(MATRIX ds,MATRIX centroids,MAP map, int n, int d, int m, 
  free_block(occ);
 return media;
 }
-void stampaCentroidi(params* input){
-	for(int i=0;i<input->m;i++){
-		printf("------------------------		GRUPPO		<%1d>		------------------------\n",i);
-		for(int j=0;j<input->k;j++){
-			printf("%1d--  ",j);
-			for(int m=0;m<(input->d/input->m);m++){
-				printf("%1.1f ",input->quant[getCentroidIndex(input,i,j,m)]);
-			}
-			printf("\n");
-		}
-		printf("\n");
-	}
-}
+
 void stampaQuantiMappatiPerOgniCentroide(params* input){
 	MAP map= input->map;
 	// stampaMappa(input);
@@ -330,7 +307,7 @@ float absoluteValue(float r){
 }
 
 void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int group, int tmin,int tmax, float eps){
-	// printf("GRUPPO %d\n\n", group);
+	printf("GRUPPO %d\n\n", group);
 	for(int i=0;i<tmin;i++){
 		updateNN(ds,centroids,map,n,d,m,k,group);
 	 	float* newCentroids=mediaGeometrica(ds,centroids,map,n,d, m, k,group);
