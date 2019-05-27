@@ -199,7 +199,7 @@ float calcDistMatrix(params*input){
 				// stampaVettore(q2,1,9);
 				//  printf("SBAGLIATA %f\n",dista(q1,q2,1,1,9));
 				//  printf("GUSTA %f\n\n",dist(q1,q2,1,1,9));
-			 		M[j*k*k+i*k+q]=dista(input->quant,input->quant,i1,i2,d/m);
+			 		M[j*k*k+i*k+q]=dist(input->quant,input->quant,i1,i2,d/m);
 			 }
 		 }
 	 }

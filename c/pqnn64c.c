@@ -200,9 +200,21 @@ void popolaANN(params* input);
 void printMatrix(params* input);
 void writeQuery(char* filename);
 void writeDataset(char* filename);
-void k_means(params* input);
+void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int tmin,int tmax, float eps);
+
 void pqnn_index(params* input) {
-		k_means(input);
+	MATRIX ds= input->ds;
+	MATRIX centroids= input->quant;
+	MAP map= input->map;
+	int n= input->n;
+	int d= input->d;
+	int m= input->m;
+	int k= input->k;
+	int tmin= input->tmin;
+	int tmax= input->tmax;
+	float eps= input->eps;
+
+		k_means(ds, centroids, map, n, d, m, k, tmin, tmax, eps);
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
 		//
@@ -426,7 +438,8 @@ int main(int argc, char** argv) {
 	//printMatrix(input);
 	input->ANN = (MAP) get_block(input->nq*input->knn,sizeof(int));
 	input->dis=malloc(input->m*input->k*input->k*sizeof(float));//alloc_matrix(input->m,input->k*input->k);
-
+	input->quant=get_block(sizeof(float), input->k*input->d);
+	input->map=get_block(sizeof(int), input->n*input->m);
 	clock_t t = clock();
 	pqnn_index(input);
 	t = clock() - t;
