@@ -48,6 +48,8 @@ void free_block(void* p);
 //c Centroide
 //v componente del centroide
 extern float dista(MATRIX m1, MATRIX m2, int x1, int x2, int k);
+
+
 // calola la distanza geometrica tra il punto x1 e x2
 // x1 e x2 devono avere la stessa dimensione k
 // x1 appartiene a m1 e x2 appartiene a m2
@@ -97,28 +99,41 @@ void stampaMappa(params* input){
 		printf("\n");
 }
 }
+
+//Esegue k-means sul gruppo group del dataset ds, aggiornando la mappa e i centroidi
+//ds ->dataset
+// centroids _> centroidi
 void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int group, int tmin,int tmax, float eps);
+//Seleziona n centroidi casuali dal dataset ds e li memorizza in centroids
 void select_random_centroid(MATRIX ds,MATRIX centroids, int n, int d, int m, int k);
 
  //Aggiorna gli ann in map relativi al gruppo group servendosi dei centroidi
 void updateNN(MATRIX ds,MATRIX centroids, MAP map,int n, int d, int m, int k, int group){
+		//vettore che contiene distanze
 		float* dis= get_block(sizeof(float), k);
 		int dm= (int)d/m;
+		//per ogni elemento del dataset vado a cercare quale centroide gli è più vicino
 		for(int i=0;i<n;i++){
 			int i1=i*d+group*dm;
+			//posizione ipotetica del minimo
 			int min=0;
+			//TODO si può eliminare il vettore in realtà
+			//calcola la distanza e aggiorna la posizione del minimo
 			for(int j=0;j<k;j++) {
 				int j1=j*d+group*dm;
 				dis[j]=dist(ds,centroids,i1,j1,dm);
 				if(dis[min]>dis[j])
 					min=j;
+				}
+				//vai nella mappa relativa al gruppo group del punto i e aggiorna il centroide da cui è mappato
 				map[i*m+group]=min;
-			}
+
 		}
 		free_block(dis);
 }
 extern float calcolaDifferenzaVect(MATRIX m1, MATRIX m2, int group, int k, int dm);
-
+//calcola la somma di quanto i vettori in centroids(solo relativi al gruppo group) e
+//in newCentroid si sono spostati
 float calcolaDifferenza(MATRIX centroids,int d,int m, int k, int group,float* newCentroid){
 		float diff=0;
 		float tot=0;
@@ -165,7 +180,7 @@ float calcolaDifferenza2(params* input,int group,float* newCentroid){
 		return tot;
 }
 
-
+//aggiorna il valore dei centroidi del gruppo group con i nuovi valori contenuti in newCentroids
 void updateCentroids(MATRIX centroids,int d, int m, int k,int group,float* newCentroids){
 	int dm= d/m;
 		for(int i=0;i<k;i++){
@@ -179,11 +194,13 @@ void updateCentroids(MATRIX centroids,int d, int m, int k,int group,float* newCe
 
 //calcola la media geometrica dei punti mappati dai centroidi di un gruppo
 float* mediaGeometrica(MATRIX ds,MATRIX centroids,MAP map, int n, int d, int m, int k, int group){
+
+	int dm=(int)d/m;
 	//contiene blocchi k blocchi di d/m elementi. ogni blocco rappresenta la media mediaGeometrica
 	//dei punti mappati dal centroide k
-	int dm=(int)d/m;
- 	float* media= get_block(sizeof(float), k*dm);;
-	int*occ=get_block(sizeof(int),k);;
+ 	float* media= get_block(sizeof(float), k*dm);
+	//vettore delle occorrenze che dice quanti punti il centroide i mappa
+	int* occ=get_block(sizeof(int),k);
 	for(int i=0;i<k;i++)
 		occ[i]=1;
 		for(int i=0; i<k;i++) {
@@ -274,15 +291,14 @@ void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, i
 	// k:numero di centroidi per gruppo
 	//m:numero di gruppi
 	//d:numero di dimensioni di un punto del dataset
-	// punti necessari: k*m*d/m-> k*d
 
 	select_random_centroid(ds,centroids, n, d, m, k);
 	//stampaCentroidi(input);
 	// stampaMappa(input);
 
-	for(int i=0;i<m;i++){
+	for(int i=0;i<m;i++)
 			sub_k_means(ds,centroids, map, n, d, m, k,i, tmin,tmax,eps);
-		}
+
 	 // stampaMappa(input);
 	 // stampaCentroidi(input);
 
@@ -291,6 +307,7 @@ void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, i
 //calcola i k centroidi casuali relativi al gruppo group
 void select_random_centroid(MATRIX ds,MATRIX centroids, int n, int d, int m, int k){
 	//selezione dei numeri casuali
+	//inizializzazione del seme
 	srand(time(NULL));
 	for(int i=0;i<k;i++)
 	for(int j=0;j<m;j++){
