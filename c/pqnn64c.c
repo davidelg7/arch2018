@@ -77,7 +77,9 @@ typedef struct {
 	MATRIX quant;
 	MAP map;
 	MATRIX dis;
-
+	MAP map2;
+	MATRIX res;
+	MATRIX quant2;
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -197,10 +199,12 @@ extern int* pqnn64_search(params* input);
  * 	==========
  */
 void popolaANN(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, int nq,int d, int m, int k,int knn, int exaustive, int symmetric);
-void printMatrix(params* input);
+void printMatrix(MATRIX,int,int);
 void writeQuery(char* filename);
 void writeDataset(char* filename);
 void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int tmin,int tmax, float eps);
+void coarse(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int k, int tmin,int tmax, float eps);
+void popolaRes(MATRIX ds,MAP map2, MATRIX res, MATRIX quant2, int n , int d, int kc);
 
 void pqnn_index(params* input) {
 	MATRIX ds= input->ds;
@@ -213,8 +217,19 @@ void pqnn_index(params* input) {
 	int tmin= input->tmin;
 	int tmax= input->tmax;
 	float eps= input->eps;
+	MAP map2= input->map2;
+	MATRIX quant2 = input->quant2;
+	MATRIX res = input->res;
+	int kc = input->kc;
 
+	if(input->exaustive==1)
 		k_means(ds, centroids, map, n, d, m, k, tmin, tmax, eps);
+	else{
+		coarse(ds, quant2, map2, n, d, kc, 4, tmax, eps);
+		popolaRes(ds, map2, res, quant2, n, d, kc);
+		printf("FATTO\n" );
+		printMatrix(res,n,d);
+	}
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
 		//
@@ -246,7 +261,6 @@ void pqnn_search(params* input) {
     // -------------------------------------------------
 
 }
-void printMatrix(params* input);
 
 int main(int argc, char** argv) {
 
@@ -265,7 +279,7 @@ int main(int argc, char** argv) {
 	input->knn = 1;
 	input->m = 8;
 	input->k = 256;
-	input->kc = 8192;
+	input->kc = 2048;
 	input->w = 16;
 	input->eps = 0.01;
 	input->tmin = 10;
@@ -437,10 +451,20 @@ int main(int argc, char** argv) {
 	// Costruisce i quantizzatori
 	//
 	//printMatrix(input);
+
 	input->ANN = (MAP) get_block(input->nq*input->knn,sizeof(int));
-	input->dis=(MATRIX)get_block(sizeof(float),input->m*input->k*input->k);//alloc_matrix(input->m,input->k*input->k);
-	input->quant=(MATRIX)get_block(sizeof(float), input->k*input->d);
-	input->map=(MAP)get_block(sizeof(int), input->n*input->m);
+	if(input->symmetric==1){
+		input->dis=(MATRIX)get_block(sizeof(float),input->m*input->k*input->k);//alloc_matrix(input->m,input->k*input->k);
+	}
+	if(input->exaustive==1){
+		input->quant=(MATRIX)get_block(sizeof(float), input->k*input->d);
+		input->map=(MAP)get_block(sizeof(int), input->n*input->m);
+	}
+	if(input->exaustive==0){
+		input->quant2=(MATRIX)get_block(sizeof(float), input->kc*input->d);
+		input->map2=(MAP)get_block(sizeof(int), input->n*input->m);
+		input->res=(MATRIX)get_block(sizeof(float),input->n*input->d);
+	}
 
 	clock_t t = clock();
 	pqnn_index(input);
@@ -490,12 +514,11 @@ int main(int argc, char** argv) {
 	return 0;
 
 }
-void printMatrix(params* input){
+void printMatrix(MATRIX m, int r, int c){
 
-for (int i = 0; i < input->n; i++) {
-	for(int j=0;j<input->m;j++){
-		for(int m=0;m<input->d/input->m;m++)
-			printf("%1.1f,\t",input->ds[i*input->d+j*input->d/input->m+m] );
+for (int i = 0; i < r; i++) {
+	for(int j=0;j<c;j++){
+			printf("%1.1f,\t",m[i*r+j] );
 	}
 		printf("\n");
 	}
