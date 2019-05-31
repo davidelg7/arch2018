@@ -47,7 +47,8 @@ void popolaANN_EA(MATRIX qs,MATRIX centroids,MAP ann,MAP map,int n, int nq,int d
 float calcDistMatrix(MATRIX centroids, MATRIX dis,int d, int m,int k);
 extern float dista(MATRIX m1, MATRIX m2, int x1, int x2, int k);
 float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k);
-
+void* get_block(int size, int elements);
+void free_block(void* p);
 
 void popolaANN(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, int nq,int d, int m, int k,int knn, int exaustive, int symmetric){
 	if(exaustive==1&&symmetric==1){
@@ -69,7 +70,7 @@ int* quantize(MATRIX qs,MATRIX centroids,int d,int m,int k,int q){
 		int indiceInizioQuery= q*d+j*dm;
 		for(int i=0;i<k;i++){
 			int indiceInizioCentroide=i*d+j*dm;
-			distanze[i]=dist(centroids,qs,indiceInizioCentroide,indiceInizioQuery,dm);
+			distanze[i]=dista(centroids,qs,indiceInizioCentroide,indiceInizioQuery,dm);
 		}
 		int min=0;
 		for(int z=0;z<k;z++)
@@ -125,7 +126,7 @@ void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, i
 	//Per ogni punto del queryset
 	for(int i=0;i<nq;i++){
 		int*q=quantize(qs,centroids,d,m,k,i);
-		float*vicini= malloc(knn*2*sizeof(float)); //(id,dist)
+		float*vicini= get_block(sizeof(float),knn*2); //(id,dist)
 		int p=0;
 		for(int x=0;x<n;x++){
 			float dx=0;
@@ -135,11 +136,9 @@ void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, i
 				// printf("%d\n",indice);
 				//avanzo del Centroide x
 				indice+=map[x*m+j]*k;
-
 				//avanzo del centroide mappato da i
 				indice+=q[j];
 				dx=dx+dis[indice]*dis[indice];
-
 		}
 			//Se ancora non ne ho trovati knn,metto i primi che trovo
 			if(p<knn*2){
@@ -166,7 +165,7 @@ void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, i
 			ann[i*knn+s]=(int)vicini[s*2];
 		}
 		free(q);
-		free(vicini);
+		free_block(vicini);
 	}
 
 }
@@ -180,13 +179,6 @@ float calcDistMatrix(MATRIX centroids, MATRIX dis,int d, int m,int k){
 			 int i1=i*d+j*d/m;
 			 for(int q=0;q<k;q++){
 				 int i2=q*d+j*d/m;
-				// printf("%d %d %d\n",(i1%16+i1)%16,i1%16,i1);
-				// float q1[9] = {3,2, 0, 1,7,4, 3,2,6};
-				// float q2[9] = {1,1,3,0,5,6,6,6,4};
-				// stampaVettore(q1,1,9);
-				// stampaVettore(q2,1,9);
-				//  printf("SBAGLIATA %f\n",dista(q1,q2,1,1,9));
-				//  printf("GUSTA %f\n\n",dist(q1,q2,1,1,9));
 			 		dis[j*k*k+i*k+q]=dista(centroids,centroids,i1,i2,d/m);
 			 }
 		 }

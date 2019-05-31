@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
 	input->knn = 1;
 	input->m = 8;
 	input->k = 256;
-	input->kc = 2048;
+	input->kc = 8192;
 	input->w = 16;
 	input->eps = 0.01;
 	input->tmin = 10;
