@@ -121,7 +121,7 @@ void updateNN(MATRIX ds,MATRIX centroids, MAP map,int n, int d, int m, int k, in
 			//calcola la distanza e aggiorna la posizione del minimo
 			for(int j=0;j<k;j++) {
 				int j1=j*d+group*dm;
-				dis[j]=dist(ds,centroids,i1,j1,dm);
+				dis[j]=dista(ds,centroids,i1,j1,dm);
 				if(dis[min]>dis[j])
 					min=j;
 				}
@@ -144,7 +144,7 @@ float calcolaDifferenza(MATRIX centroids,int d,int m, int k, int group,float* ne
 			int i1=i*d+group*dm;
 			int i2=i*dm;
 			//per ogni componente del centroide i
-			diff=diff+dist(centroids,newCentroid,i1,i2,dm);
+			diff=diff+dista(centroids,newCentroid,i1,i2,dm);
 			tot+=diff;
 		}
 		return tot;
@@ -156,15 +156,15 @@ void stampaVettore(MATRIX f,int start,int stop){
 		printf("\n");
 
 }
-float calcolaDifferenza2(params* input,int group,float* newCentroid){
+float calcolaDifferenza2(MATRIX centroids,int d,int m, int k, int group,float* newCentroid){
 		float diff=0;
 		float tot=0;
-		MATRIX q=input->quant;
-		int dm=input->d/input->m;
+		MATRIX q=centroids;
+		int dm=d/m;
 		//per ogni centroide
-		for(int i=0;i<input->k;i++){
+		for(int i=0;i<k;i++){
 			diff=0;
-			int i1=i*input->d+group*dm;
+			int i1=i*d+group*dm;
 			int i2=i*dm;
 			//per ogni componente del centroide i
 			float d= dista(q,newCentroid,i1,i2,dm);
@@ -174,7 +174,6 @@ float calcolaDifferenza2(params* input,int group,float* newCentroid){
 			printf("SBAGLIATA %f \n",d );
 			printf("\n");
 			diff=diff+d;
-
 			tot+=diff;
 		}
 		return tot;
@@ -287,22 +286,20 @@ void stampaQuantiMappatiPerOgniCentroide(params* input){
 //calcola i k centroidi attraverso  k_means
 //una chiamata a sub_k_means li calcola per ogni gruppo 0<=i<=m
 void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int tmin,int tmax, float eps){
+	// float q1[9] = {3,2, 0, 1,7,4, 3,2,7};
+	// float q2[9] = {1,1,3,0,5,6,6,6,8};
+	// stampaVettore(q1,0,9);
+	// stampaVettore(q2,0,9);
+	//  printf("SBAGLIATA %f\n",dista(q1,q2,0,0,9));
+	//  printf("GUSTA %f\n\n",dist(q1,q2,0,0,9));
+	//  exit(-1);
 	// dimensione matrice quant:
 	// k:numero di centroidi per gruppo
 	//m:numero di gruppi
 	//d:numero di dimensioni di un punto del dataset
-
 	select_random_centroid(ds,centroids, n, d, m, k);
-	//stampaCentroidi(input);
-	// stampaMappa(input);
-
 	for(int i=0;i<m;i++)
 			sub_k_means(ds,centroids, map, n, d, m, k,i, tmin,tmax,eps);
-
-	 // stampaMappa(input);
-	 // stampaCentroidi(input);
-
-	// stampaQuantiMappatiPerOgniCentroide(input);
 	}
 //calcola i k centroidi casuali relativi al gruppo group
 void select_random_centroid(MATRIX ds,MATRIX centroids, int n, int d, int m, int k){
@@ -311,7 +308,7 @@ void select_random_centroid(MATRIX ds,MATRIX centroids, int n, int d, int m, int
 	srand(time(NULL));
 	for(int i=0;i<k;i++)
 	for(int j=0;j<m;j++){
-			int rnd=rand() % n;
+			int rnd=i;
 			for(int p=0;p<d/m;p++){
 				centroids[i*d+j*d/m+p]=ds[rnd*d+j*d/m+p];
 		}
@@ -329,7 +326,7 @@ void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int 
 		updateNN(ds,centroids,map,n,d,m,k,group);
 	 	float* newCentroids=mediaGeometrica(ds,centroids,map,n,d, m, k,group);
 		float increment=calcolaDifferenza(centroids,d,m,k,group,newCentroids);
-		// float increment2=calcolaDifferenza2(input,group,newCentroids);
+		// float increment2=calcolaDifferenza2(centroids,d,m,k,group,newCentroids);
 		printf("Al passo %d i centroidi sono stati spostati di un totale di %1.3f\n",i, increment);
 		// printf("Al passo %d i centroidi sono stati spostati di un totale di %1.3f\n\n",i, increment2);
 		 // writeCentroid(input,group,i);

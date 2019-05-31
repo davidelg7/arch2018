@@ -6,10 +6,10 @@ section .text
 	push	rbx
 	push	rcx
 	push	rdx
-;	push	rbp
+  push	rbp
 	push	rsi
 	push	rdi
-;	push	rsp
+	push	rsp
 	push	r8
 	push	r9
 	push	r10
@@ -29,21 +29,23 @@ section .text
 	pop	r10
 	pop	r9
 	pop	r8
-;	pop	rsp
+	pop	rsp
 	pop	rdi
 	pop	rsi
-;	pop	rbp
+	pop	rbp
 	pop	rdx
 	pop	rcx
 	pop	rbx
   pop rax
 %endmacro
 
-S1      equ     8
+S1 equ     8
 S2 equ     12
-i1  equ     16
-i2      equ     20
-dest      equ     24
+I1 equ     16
+I2 equ     20
+STEP equ 4
+DIMREG equ 8
+
 global dista
 
 dista :
@@ -59,25 +61,37 @@ pushaq						; salva i registri generali
 ; ------------------------------------------------------------
 ; rdi = indirizzo della struct input
 
-  vmovaps ymm0,[rdi+rdx*4]
-  vmovaps ymm1,[rsi+rcx*4]
-  vsubps  ymm0, ymm1
-  vmulps  ymm0,ymm0
-  add rdx,8
-  add rcx, 8
-  vmovaps ymm2,[rdi+rdx*4]
-  vmovaps ymm3,[rsi+rcx*4]
-  vsubps  ymm2, ymm3
-  vmulps  ymm2,ymm2
-  vhaddps ymm0,ymm0
-  vhaddps ymm2,ymm2
-  vhaddps ymm2,ymm2
-  vhaddps ymm0,ymm0
-  vperm2f128 ymm1,ymm0,ymm0,1
-  vperm2f128 ymm3,ymm2,ymm2,1
-  vaddss xmm2,xmm3
-  vaddss xmm0,xmm1
-  vaddss xmm2,xmm0
+   xor rax,rax
+  vzeroall
+   cicloQuoziente:
+     cmp r8,8
+     jl cicloResto
+    sub r8,DIMREG
+    vmovups ymm1,[rdi+rdx*STEP]
+    vmovups ymm2,[rsi+rcx*STEP]
+    vsubps  ymm1,ymm2
+    add rdx,DIMREG
+    add rcx,DIMREG
+    vmulps  ymm1,ymm1
+    vhaddps ymm1,ymm1
+    vhaddps ymm1,ymm1
+    vperm2f128 ymm2,ymm1,ymm1,1
+    vaddss xmm1,xmm2
+    addss xmm0,xmm1
+     jmp  cicloQuoziente
+  cicloResto:
+    cmp r8,0
+    je fine
+    vmovss xmm1,[rdi+rdx*STEP]
+    vmovss xmm2,[rsi+rcx*STEP]
+    subss xmm1,xmm2
+    mulss xmm1,xmm1
+    sub r8,1
+    add rdx,1
+    add rcx, 1
+    addss xmm0,xmm1
+    jmp cicloResto
+  fine:
   vsqrtps ymm0,ymm0
 ; ------------------------------------------------------------
 ; Sequenza di uscita dalla funzione
@@ -86,4 +100,4 @@ pushaq						; salva i registri generali
 popaq						; ripristina i registri generali
 mov		rsp, rbp			; ripristina lo Stack Pointer
 pop		rbp				; ripristina il Base Pointer
-  ret
+ret

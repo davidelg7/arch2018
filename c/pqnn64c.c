@@ -225,10 +225,8 @@ void pqnn_index(params* input) {
 	if(input->exaustive==1)
 		k_means(ds, centroids, map, n, d, m, k, tmin, tmax, eps);
 	else{
-		coarse(ds, quant2, map2, n, d, kc, 4, tmax, eps);
+		coarse(ds, quant2, map2, n, d, kc, tmin, tmax, eps);
 		popolaRes(ds, map2, res, quant2, n, d, kc);
-		printf("FATTO\n" );
-		printMatrix(res,n,d);
 	}
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
@@ -518,7 +516,7 @@ void printMatrix(MATRIX m, int r, int c){
 
 for (int i = 0; i < r; i++) {
 	for(int j=0;j<c;j++){
-			printf("%1.1f,\t",m[i*r+j] );
+			printf("%1.1f,\t",m[i*c+j] );
 	}
 		printf("\n");
 	}

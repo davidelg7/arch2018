@@ -187,7 +187,7 @@ float calcDistMatrix(MATRIX centroids, MATRIX dis,int d, int m,int k){
 				// stampaVettore(q2,1,9);
 				//  printf("SBAGLIATA %f\n",dista(q1,q2,1,1,9));
 				//  printf("GUSTA %f\n\n",dist(q1,q2,1,1,9));
-			 		dis[j*k*k+i*k+q]=dist(centroids,centroids,i1,i2,d/m);
+			 		dis[j*k*k+i*k+q]=dista(centroids,centroids,i1,i2,d/m);
 			 }
 		 }
 	 }
