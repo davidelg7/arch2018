@@ -11,14 +11,14 @@ done
 
 mv *o ../compiledTmp
 cd ../c
-gcc -c $(ls )
+gcc -c  $(ls )  -fopenmp
 mv *.o ../compiledTmp
 
 cd ../compiledTmp
 
-gcc -Wall -o pqnn64 $(ls) -lm
+gcc -Wall -fopenmp -o pqnn64 $(ls) -lm
 
 rm -f ../compiled/*
 mv * ../compiled
 cd ../compiled
-./pqnn64 ../ds/prova 
+time ./pqnn64 ../ds/prova -noexaustive -kc 758

@@ -167,8 +167,36 @@ void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, i
 		free(q);
 		free_block(vicini);
 	}
+}
+void popolaANN_NES(MATRIX qs,MATRIX coarse,int nq,int d,int kc,int w){
+//per ogni punto queryset
+	for(int i=0;i<nq;i++){
+		float* ci= get_block(sizeof(float),w*2);//[id-dist]
+		//per ogni coarse
+		for(int j=0;j<kc;j++){
+			float d=dista(qs,coarse,i*d,j*d,d);
+			if(j<w){
+			ci[j*2]=j;
+			ci[j*2+1]=d;
+		}
+		else{
+			int max=0;
+			for(int k=0;k<w;k++)
+				if(ci[k+1]>ci[max+1])
+					max=k;
+			if(ci[max+1]>d)
+				ci[max]=j;
+				ci[max+1]=d;
+		}
+		}
+		//in ci ho gli id-distanze di tutti i centroidi coarse più vicini al punto query i
+
+		free_block(ci);
+	}
 
 }
+
+
 void stampaVettore(MATRIX f,int start,int stop);
 float calcDistMatrix(MATRIX centroids, MATRIX dis,int d, int m,int k){
 	 //per ogni gruppo

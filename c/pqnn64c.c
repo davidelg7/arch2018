@@ -45,6 +45,7 @@
 #include <string.h>
 #include <time.h>
 #include <xmmintrin.h>
+#include <omp.h>
 
 #define	MATRIX		float*
 #define	VECTOR		int*
@@ -80,6 +81,11 @@ typedef struct {
 	MAP map2;
 	MATRIX res;
 	MATRIX quant2;
+
+	MATRIX ds2; //contriene nr punti residui casuali
+
+	MATRIX quant3;//contiene i quantizzatori prodotto della ricerca non esaustiva
+	MAP map3;//contiene la mappa [residuo->centroide in quant3]
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -169,7 +175,7 @@ MATRIX load_data(char* filename, int *n, int *d) {
 
 	*n = rows;
 	*d = cols;
-
+https://cs.stanford.edu/~jure/pubs/node2vec-kdd16.pdf
 	return data;
 }
 
@@ -205,6 +211,7 @@ void writeDataset(char* filename);
 void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int tmin,int tmax, float eps);
 void coarse(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int k, int tmin,int tmax, float eps);
 void popolaRes(MATRIX ds,MAP map2, MATRIX res, MATRIX quant2, int n , int d, int kc);
+void popolaDs2(MATRIX res,MATRIX ds2,MAP map2,int nr,int d);
 
 void pqnn_index(params* input) {
 	MATRIX ds= input->ds;
@@ -221,12 +228,17 @@ void pqnn_index(params* input) {
 	MATRIX quant2 = input->quant2;
 	MATRIX res = input->res;
 	int kc = input->kc;
-
+	MATRIX ds2= input->ds2;
+	int nr= input->nr;
+	MAP map3= input->map3;
+	MATRIX quant3 = input->quant3;
 	if(input->exaustive==1)
 		k_means(ds, centroids, map, n, d, m, k, tmin, tmax, eps);
 	else{
 		coarse(ds, quant2, map2, n, d, kc, tmin, tmax, eps);
 		popolaRes(ds, map2, res, quant2, n, d, kc);
+		popolaDs2(res,ds2,map2,nr,d);
+		k_means(ds2, quant3, map3, nr, d, m, k, tmin, tmax, eps);
 	}
     // -------------------------------------------------
     // Codificare qui l'algoritmo di indicizzazione
@@ -462,6 +474,11 @@ int main(int argc, char** argv) {
 		input->quant2=(MATRIX)get_block(sizeof(float), input->kc*input->d);
 		input->map2=(MAP)get_block(sizeof(int), input->n*input->m);
 		input->res=(MATRIX)get_block(sizeof(float),input->n*input->d);
+		input->ds2=(MATRIX)get_block(sizeof(float),input->nr*input->d);
+
+		input->quant3=(MATRIX)get_block(sizeof(float), input->k*input->d);
+		input->map3=(MAP)get_block(sizeof(int), input->nr*input->m);
+
 	}
 
 	clock_t t = clock();

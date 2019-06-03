@@ -11,8 +11,8 @@
 ;     NASM (www.nasm.us)
 ;     GCC (gcc.gnu.org)
 ;
-; entrambi sono disponibili come pacchetti software 
-; installabili mediante il packaging tool del sistema 
+; entrambi sono disponibili come pacchetti software
+; installabili mediante il packaging tool del sistema
 ; operativo; per esempio, su Ubuntu, mediante i comandi:
 ;
 ;     sudo apt-get install nasm
@@ -25,7 +25,7 @@
 ;
 ; Per generare file oggetto:
 ;
-;     nasm -f elf64 pqnn32.nasm 
+;     nasm -f elf64 pqnn32.nasm
 ;
 
 %include "sseutils64.nasm"
@@ -66,16 +66,7 @@ section .text			; Sezione contenente il codice macchina
 extern get_block
 extern free_block
 
-%macro	getmem	2
-	mov	rdi, %1
-	mov	rsi, %2
-	call	get_block
-%endmacro
 
-%macro	fremem	1
-	mov	rdi, %1
-	call	free_block
-%endmacro
 
 
 ; ------------------------------------------------------------
@@ -98,21 +89,21 @@ pqnn64_index:
 		; I paramentri sono passati nei registri
 		; ------------------------------------------------------------
 		; rdi = indirizzo della struct input
-		
 
-		
-		
+
+
+
 		; ------------------------------------------------------------
 		; Sequenza di uscita dalla funzione
 		; ------------------------------------------------------------
-		
+
 		popaq						; ripristina i registri generali
 		mov		rsp, rbp			; ripristina lo Stack Pointer
 		pop		rbp				; ripristina il Base Pointer
 		ret						; torna alla funzione C chiamante
 
-		
-		
+
+
 pqnn64_search:
 		; ------------------------------------------------------------
 		; Sequenza di ingresso nella funzione
@@ -125,16 +116,15 @@ pqnn64_search:
 		; I paramentri sono passati nei registri
 		; ------------------------------------------------------------
 		; rdi = indirizzo della struct input
-		
 
-		
-		
+
+
+
 		; ------------------------------------------------------------
 		; Sequenza di uscita dalla funzione
 		; ------------------------------------------------------------
-		
+
 		popaq						; ripristina i registri generali
 		mov		rsp, rbp			; ripristina lo Stack Pointer
 		pop		rbp				; ripristina il Base Pointer
 		ret						; torna alla funzione C chiamante
-		

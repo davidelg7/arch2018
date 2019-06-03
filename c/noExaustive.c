@@ -34,8 +34,14 @@ typedef struct {
 	MAP map;
 	MATRIX dis;
 	MATRIX res;
+
   MATRIX map2;
   MATRIX quant2;
+
+	MATRIX ds2;
+
+		MATRIX quant3;//contiene i quantizzatori prodotto della ricerca non esaustiva
+		MAP map3;//contiene la mappa [residuo->centroide in quant3]
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -45,6 +51,20 @@ typedef struct {
 	//
 
 } params;
+void stampaVettore(MATRIX f,int start,int stop);
+void printMatrix2(MATRIX m, MATRIX m2,MATRIX m3,MAP map,int r, int c){
+for (int i = 0; i < r; i++) {
+	printf("%d->%d\t\t",i,map[i]);
+	printf("IL VETTORE \n");
+	stampaVettore(m,i*c,i*c+c);
+	printf("E' LA DIFFERENZA DI\n");
+	stampaVettore(m2,i*c,i*c+c);
+	printf("E\n");
+	stampaVettore(m3,map[i]*c,map[i]*c+c);
+
+		printf("\n");
+	}
+}
 
 void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int tmin,int tmax, float eps);
 
@@ -64,4 +84,9 @@ void popolaRes(MATRIX ds,MAP map2, MATRIX res, MATRIX quant2, int n , int d, int
     int i2 = quant*d;
     diff(res, ds, quant2, i1, i2, d);
   }
+}
+void popolaDs2(MATRIX res,MATRIX ds2,MAP map,int nr,int d){
+	for(int i=0;i<nr;i++)
+		for(int j=0;j<d;j++)
+			ds2[i*d+j]=res[i*d+j];
 }

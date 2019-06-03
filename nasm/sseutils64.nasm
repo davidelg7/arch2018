@@ -34,9 +34,25 @@ br2:	db		')',10,0
 	vmovups	%1, [rsp]
 	add	rsp, 32
 %endmacro
+extern get_block
+extern free_block
+
+%macro	getmem	2
+
+	mov	rdi, %1
+	mov	rsi, %2
+	call	get_block
+%endmacro
+
+%macro	fremem	1
+	mov	rdi, %1
+
+	call	free_block
+
+%endmacro
 
 %macro	pushaq	0
-	push	rax
+	;push	rax
 	push	rbx
 	push	rcx
 	push	rdx
@@ -70,7 +86,7 @@ br2:	db		')',10,0
 	pop	rdx
 	pop	rcx
 	pop	rbx
-	pop	rax
+	;pop	rax
 %endmacro
 
 %macro vpushay 0
