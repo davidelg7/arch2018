@@ -2,11 +2,11 @@ cd $(dirname "$0")/compiledTmp
 rm -f *
 cd ../nasm
 
-for f in *32.nasm; do
+for f in *64.nasm; do
   filename=$(basename -- "$f")
   extension="${filename##*.}"
   filename="${filename%.*}"
-  nasm -felf32 -g -Fdwarf "$f" -o "$filename".o
+  nasm -felf64 -g -Fdwarf "$f" -o "$filename".o
 done
 
 mv *o ../compiledTmp
@@ -16,9 +16,10 @@ mv *.o ../compiledTmp
 
 cd ../compiledTmp
 
-gcc -Wall -fopenmp -o pqnn32 $(ls) -lm
+gcc -Wall -fopenmp -o pqnn64 $(ls) -lm
 
 rm -f ../compiled/*
 mv * ../compiled
 cd ../compiled
-time ./pqnn32 ../ds/prova
+clear
+./pqnn64 ../ds/prova -noexaustive -nr 8000 -kc 8000 -k 2000 -m 128 
