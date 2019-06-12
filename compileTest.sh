@@ -2,7 +2,7 @@ cd $(dirname "$0")/compiledTmp
 rm -f *
 cd ../nasm
 
-for f in *.nasm; do
+for f in *64.nasm; do
   filename=$(basename -- "$f")
   extension="${filename##*.}"
   filename="${filename%.*}"
@@ -21,4 +21,4 @@ gcc -Wall -o pqnn64 $(ls) -lm
 rm -f ../compiled/*
 mv * ../compiled
 cd ../compiled
-./pqnn64 ../ds/Test -noexaustive -kc 2 
+./pqnn64 ../ds/Test -d -m 1 -k 20  -knn 1 -adc 

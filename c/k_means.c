@@ -49,7 +49,8 @@ void free_block(void* p);
 //c Centroide
 //v componente del centroide
 extern float dista(MATRIX m1, MATRIX m2, int x1, int x2, int k);
-extern float* vettoreDistanze(MATRIX m1, MATRIX m2, int x1, int x2, int dim,int d,int k);
+extern float dista2(MATRIX m1, MATRIX m2, int x1, int x2, int k);
+//extern float* vettoreDistanze(MATRIX m1, MATRIX m2, int x1, int x2, int dim,int d,int k);
 
 // calola la distanza geometrica tra il punto x1 e x2
 // x1 e x2 devono avere la stessa dimensione k
@@ -57,48 +58,23 @@ extern float* vettoreDistanze(MATRIX m1, MATRIX m2, int x1, int x2, int dim,int 
 float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
 	float d=0;
 		for(int i=0;i<k;i++)
-			d+=(m1[x1+i]-m2[x2+i])*(m1[x1+i]-m2[x2+i]);
-	d=sqrtf(d);
-	return d;
+			d=d+(m1[x1+i]-m2[x2+i])*(m1[x1+i]-m2[x2+i]);
+
+	return sqrtf(d);
 }
 float distanza(MATRIX m1, MATRIX m2, int x1, int x2, int k){
 	return dista( m1,  m2,  x1,  x2,  k);
 }
 // extern float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k);
 
-void writeCentroid(params* input,int group, int passo) {
+void writeCentroid(MATRIX qs,MATRIX quant,MAP map,int n,int m,int d,int k,int group, int passo);
 
 
-	for(int j=0;j<input->k;j++){
-		FILE* fp;
-		char buf[256];
-		snprintf(buf, sizeof buf, "../csv/p %d c %d g %d.csv",passo,j,group);
-		fp = fopen(buf, "w+");
-		fprintf(fp,"%s,","x");
-		fprintf(fp,"%s,\n","y");
+void stampaMappa(MAP map,int n, int m){
 
-			for(int m=0;m<input->d/input->m;m++){
-				fprintf(fp,"%f,",input->quant[j*input->d+group*input->d/input->m+m]);
-			}
-			fprintf(fp,"\n");
-			for(int p=0;p<input->n;p++){
-				if(input->map[p*input->m+group]==j){
-					for(int m=0;m<(input->d/input->m);m++){
-						fprintf(fp,"%f,",input->ds[p*input->d+group*input->d/input->m+m]);
-					}
-					fprintf(fp,"\n");
-
-				}
-			}
-			fclose(fp);
-
-		}
-}
-void stampaMappa(params* input){
-	MAP map=input->map;
-	for(int i=0;i<input->n;i++){
-		for(int j=0;j<1;j++){
-			printf("[%d,%d]->%d  ",i,j,map[i*input->m+j]);
+	for(int i=0;i<n;i++){
+		for(int j=0;j<m;j++){
+			printf("[%d,%d]->%d  ",i,j,map[i*m+j]);
 }
 		printf("\n");
 }
@@ -129,26 +105,24 @@ void updateNN(MATRIX ds,MATRIX centroids, MAP map,int n, int d, int m, int k, in
 
 			for(j=0;j<k;j+=4) {
 				int j1=j*d+group*dm;
-				float d1=dista(ds,centroids,i1,j1,dm);
-				float d2=dista(ds,centroids,i1,j1+d,dm);
-				float d3=dista(ds,centroids,i1,j1+2*d,dm);
-				float d4=dista(ds,centroids,i1,j1+3*d,dm);
+				float d1=distanza(ds,centroids,i1,j1,dm);
+				float d2=distanza(ds,centroids,i1,j1+d,dm);
+				float d3=distanza(ds,centroids,i1,j1+2*d,dm);
+				float d4=distanza(ds,centroids,i1,j1+3*d,dm);
 
 				if(minV>d1){
 					minV=d1;
 					min=j;
 				}
-				else
 				if(minV>d2){
 					minV=d2;
 					min=j+1;
 				}
-				else
 				if(minV>d3){
 					minV=d3;
 					min=j+2;
 				}
-				else
+
 				if(minV>d4){
 					minV=d4;
 					min=j+3;
@@ -157,7 +131,7 @@ void updateNN(MATRIX ds,MATRIX centroids, MAP map,int n, int d, int m, int k, in
 				}
 				for(;j<k;j++) {
 					int j1=j*d+group*dm;
-					float d1=dista(ds,centroids,i1,j1,dm);
+					float d1=distanza(ds,centroids,i1,j1,dm);
 					if(minV>d1){
 						minV=d1;
 						min=j;
@@ -207,42 +181,42 @@ void stampaVettore(MATRIX f,int start,int stop){
 
 }
 float calcolaDifferenza2(MATRIX centroids,int d,int m, int k, int group,float* newCentroid){
-		float diff=0;
-		float tot=0;
-		MATRIX q=centroids;
-		int dm=d/m;
-		//per ogni centroide
-		float* dis=vettoreDistanze(q,newCentroid,d+group*dm,dm,dm,d,k);
-		for(int i=0;i<k;i++){
-			dis[i]=sqrtf(dis[i]);
-			}
-			int totale=0;
-
-		for(int i=0;i<k;i++){
-			diff=0;
-			int i1=i*d+group*dm;
-			int i2=i*dm;
-			//per ogni componente del centroide i
-			float d= dist(q,newCentroid,i1,i2,dm);
-			// stampaVettore(q,i1,i1+dm);
-			// stampaVettore(newCentroid,i2,i2+dm);
-			// printf("GIUSTA %f \n",dist(q,newCentroid,i1,i2,dm));
-			// printf("SBAGLIATA %f \n",d );
-			// printf("\n");
-			printf("GIUSTA %f\n",d);
-			printf("SBAGLIATA %f\n",dis[i]);
-
-			totale=totale+dis[i];
-			diff=diff+d;
-			tot+=diff;
-		}
-		printf("GIUSTA %f\n",tot);
-
-			stampaVettore(dis,0,k);
-
-		free_block(dis);
-		printf("SBAGLIATA %f\n",totale);
-		return tot;
+		// float diff=0;
+		// float tot=0;
+		// MATRIX q=centroids;
+		// int dm=d/m;
+		// //per ogni centroide
+		// float* dis=vettoreDistanze(q,newCentroid,d+group*dm,dm,dm,d,k);
+		// for(int i=0;i<k;i++){
+		// 	dis[i]=sqrtf(dis[i]);
+		// 	}
+		// 	int totale=0;
+		//
+		// for(int i=0;i<k;i++){
+		// 	diff=0;
+		// 	int i1=i*d+group*dm;
+		// 	int i2=i*dm;
+		// 	//per ogni componente del centroide i
+		// 	float d= dist(q,newCentroid,i1,i2,dm);
+		// 	// stampaVettore(q,i1,i1+dm);
+		// 	// stampaVettore(newCentroid,i2,i2+dm);
+		// 	// printf("GIUSTA %f \n",dist(q,newCentroid,i1,i2,dm));
+		// 	// printf("SBAGLIATA %f \n",d );
+		// 	// printf("\n");
+		// 	printf("GIUSTA %f\n",d);
+		// 	printf("SBAGLIATA %f\n",dis[i]);
+		//
+		// 	totale=totale+dis[i];
+		// 	diff=diff+d;
+		// 	tot+=diff;
+		// }
+		// printf("GIUSTA %f\n",tot);
+		//
+		// 	stampaVettore(dis,0,k);
+		//
+		// free_block(dis);
+		// printf("SBAGLIATA %f\n",totale);
+		// return tot;
 }
 
 //aggiorna il valore dei centroidi del gruppo group con i nuovi valori contenuti in newCentroids
@@ -366,8 +340,10 @@ void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, i
 	//d:numero di dimensioni di un punto del dataset
 	select_random_centroid(ds,centroids, n, d, m, k);
 
+	#pragma omp parallel for
 	for(int i=0;i<m;i++)
 			sub_k_means(ds,centroids, map, n, d, m, k,i, tmin,tmax,eps);
+	// stampaMappa(map,n,m);
 	}
 //calcola i k centroidi casuali relativi al gruppo group
 void select_random_centroid(MATRIX ds,MATRIX centroids, int n, int d, int m, int k){
@@ -392,6 +368,8 @@ void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int 
 	// printf("GRUPPO %d\n\n", group);
 	for(int i=0;i<tmin;i++){
 		// printf("PASSO-%d\n",i );
+		// if(group==0)
+		// writeCentroid(ds,centroids,map,n,m,d,k,group,i);
 		updateNN(ds,centroids,map,n,d,m,k,group);
 	 	float* newCentroids=mediaGeometrica(ds,centroids,map,n,d, m, k,group);
 		// float increment=calcolaDifferenza(centroids,d,m,k,group,newCentroids);
@@ -424,5 +402,6 @@ void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int 
 		free_block(newCentroids);
 
 	}
+	// updateNN(ds,centroids,map,n,d,m,k,group);
 
 }

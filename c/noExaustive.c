@@ -40,8 +40,8 @@ typedef struct {
 
 	MATRIX ds2;
 
-		MATRIX quant3;//contiene i quantizzatori prodotto della ricerca non esaustiva
-		MAP map3;//contiene la mappa [residuo->centroide in quant3]
+	MATRIX quant3;//contiene i quantizzatori prodotto della ricerca non esaustiva
+	MAP map3;//contiene la mappa [residuo->centroide in quant3]
 	//
 	// Inserire qui i campi necessari a memorizzare i Quantizzatori
 	//
@@ -52,6 +52,7 @@ typedef struct {
 
 } params;
 void stampaVettore(MATRIX f,int start,int stop);
+
 void printMatrix2(MATRIX m, MATRIX m2,MATRIX m3,MAP map,int r, int c){
 for (int i = 0; i < r; i++) {
 	printf("%d->%d\t\t",i,map[i]);
