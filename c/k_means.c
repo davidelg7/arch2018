@@ -343,7 +343,6 @@ void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, i
 	#pragma omp parallel for
 	for(int i=0;i<m;i++)
 			sub_k_means(ds,centroids, map, n, d, m, k,i, tmin,tmax,eps);
-	stampaMappa(map,n,m);
 	}
 //calcola i k centroidi casuali relativi al gruppo group
 void select_random_centroid(MATRIX ds,MATRIX centroids, int n, int d, int m, int k){
