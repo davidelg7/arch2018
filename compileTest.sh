@@ -21,4 +21,4 @@ gcc -Wall -o pqnn64 $(ls) -lm
 rm -f ../compiled/*
 mv * ../compiled
 cd ../compiled
-./pqnn64 ../ds/Test -d -m 1 -k 20  -knn 1 -adc 
+./pqnn64 ../ds/Test -d -m 1 -k 20  -knn 2 -adc 

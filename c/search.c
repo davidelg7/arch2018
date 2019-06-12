@@ -126,61 +126,42 @@ void stampaMappa(MAP map,int n, int m);
 
 //Popola la struttura ANN inserendoci dentro le posizioni di knn approximated nn del dataset per ogni punto query in Queryset
 void popolaANN_EA(MATRIX qs,MATRIX centroids,MAP ann,MAP map,int n, int nq, int d, int m, int k, int knn){
-	int dm= d/m;
-	//Per ogni punto del queryset
-	// #pragma omp parallel for
+	int dm=d/m;
+	// per ogni punto query
 	for(int i=0;i<nq;i++){
-		//quantizzo il punto i
+		int* quantizzazione=quantize2(qs,centroids,d,m,k,i,1);
+
 		int* id= get_block(sizeof(int),knn);
-		float* distanz= get_block(sizeof(float),knn);
-		int p=0;
-		//per ogni punto del writeDataset
-		for(int x=0;x<n;x++){
-			float dx=0;
-			for(int j=0;j<m;j++){
-				int centroideX=(map[(x*m)+j]*d)+(m*dm);
-				float d2=dista2(qs,centroids,(i*d)+(j*dm),centroideX,dm);
-				dx=dx+d2*d2;
-		}
-		dx=sqrtf(dx);
+		float* distanze=get_block(sizeof(float),knn);
+		for(int j=0;j<n;j++){
 
-			//Se ancora non ne ho trovati knn,metto i primi che trovo
-			if(p<knn){
-				id[p]=x;
-				distanz[p]=dx;
-				p++;
-			}
-			else{
-				int max=0;
-				for(int l=0;l<knn;l++)
-					if(distanz[l]>distanz[max])
-						max=l;
-				//A questo punto ho la posizione del massimo
-				//posso sostituire il massimo con il corrente dx se la distanza dx è più piccola
-				if(distanz[max]>dx){
-					id[max]=x+1;
-					distanz[max]=dx;}
-			}
-			// printf("QUERY %d minimo al momento: %d\n",i,id[0]);
+				float distanza=0;
+				for(int g=0;g<m;g++){
+					distanza=distanza+dista2(qs,centroids,(i*d)+(g*dm),(map[j*m+g]*d)+(g*dm),dm);
+				}
+				distanza=sqrtf(distanza);
+		if(j<knn){
+			id[j]=j;
+			distanze[j]=distanza;
 		}
+		else{
+			int posMax=0;
+			for(int posizione=0;posizione<knn;posizione++)
+				if(distanze[posizione]>distanze[posMax])
+					posMax=posizione;
+			//a questo punto ho la posizione del massimo
+			if(distanze[posMax]>distanza){
+				id[posMax]=j;
+				distanze[posMax]=distanza;
+			}
+		}
+		}
+		for(int a =0;a<knn;a++)
+				ann[i*knn+a]=id[a];
 
-		// Arrivato qui ho controllato tutti i punti e ho in id-distanza la lista (id) dei knn più vicini a y
-		// e li salvo in ANN
-		for(int s=0;s<knn;s++){
-				int min=0;
-				for(int l=0;l<knn;l++)
-					if(id[l]!=-1){
-						min=l;
-					break;}
-				for(int l=0;l<knn;l++)
-						if(distanz[l]>0&&distanz[min]>distanz[l])
-							min=l;
-			ann[i*knn+s]=id[min];
-			id[min]=-1;
-			distanz[min]=-1;
-		}
+		free_block(quantizzazione);
 		free_block(id);
-		free_block(distanz);
+		free_block(distanze);
 	}
 }
 //Popola la struttura ANN inserendoci dentro le posizioni di knn approximated nn del dataset per ogni punto query in Queryset
