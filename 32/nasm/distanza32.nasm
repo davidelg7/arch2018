@@ -20,7 +20,7 @@ dista :
 ; Sequenza di ingresso nella funzione
 ; ------------------------------------------------------------
 push		ebp				; salva il Base Pointer
-mov		ebp, esp			; il Base Pointer punta al Record di Attivazione corrente
+mov		ebp, ebx			; il Base Pointer punta al Record di Attivazione corrente
 pushaq						; salva i registri generali
 
 
@@ -29,98 +29,102 @@ pushaq						; salva i registri generali
 ; rdi = indirizzo della struct input
 
   xor eax,eax
-  mov edi,[ebp+4]
-  mov esi,[ebp+8]
-  mov edx,[ebp+12]
-  mov ecx,[ebp+16]
-  mov eax,edi
+  mov edi,[ebp+8]
+  mov esi,[ebp+12]
+  mov edx,[ebp+16];terzo parametro
+  mov ecx,[ebp+20];quarto parametro
+  ; mov ebx,[ebp+24]
+  mov eax, ecx
   ; vzeroall
   ;     cicloQuoziente6:
-  ;     cmp [ebp+20],3*DIMREG
+  ;     cmp ebx,3*DIMREG
   ;     jl cicloQuoziente4
-  ;     sub [ebp+20],DIMREG*3
-  ;     vmovaps xmm1,[edi+edx*STEP]
-  ;     vmovaps xmm2,[esi+ecx*STEP]
+  ;     sub ebx,DIMREG*3
+  ;     movaps xmm1,[edi+edx*STEP]
+  ;     movaps xmm2,[esi+ecx*STEP]
   ;     add edx,DIMREG
   ;     add ecx,DIMREG
-  ;     vsubps  xmm1,xmm2
-  ;     vmulps xmm1,xmm1; ^2
-  ;     vmovaps xmm3,[edi+edx*STEP]
-  ;     vmovaps xmm4,[esi+ecx*STEP]
+  ;     subps  xmm1,xmm2
+  ;     mulps xmm1,xmm1; ^2
+  ;     movaps xmm3,[edi+edx*STEP]
+  ;     movaps xmm4,[esi+ecx*STEP]
   ;     add edx,DIMREG
   ;     add ecx,DIMREG
-  ;     vsubps xmm3,xmm4
-  ;     vmulps  xmm3,xmm3; ^2
-  ;     vmovaps xmm5,[edi+edx*STEP]
-  ;     vmovaps xmm6,[esi+ecx*STEP]
+  ;     subps xmm3,xmm4
+  ;     mulps  xmm3,xmm3; ^2
+  ;     movaps xmm5,[edi+edx*STEP]
+  ;     movaps xmm6,[esi+ecx*STEP]
   ;     add edx,DIMREG
   ;     add ecx,DIMREG
-  ;     vaddps xmm1,xmm3
-  ;     vsubps xmm5,xmm6
-  ;     vmulps xmm5,xmm5
-  ;     vaddps xmm1,xmm5
-  ;     vhaddps xmm1,xmm1
-  ;     vhaddps xmm1,xmm1
-  ;     vperm2f128 xmm2,xmm1,xmm1,1
-  ;     vaddss xmm1,xmm2
+  ;     addps xmm1,xmm3
+  ;     subps xmm5,xmm6
+  ;     mulps xmm5,xmm5
+  ;     addps xmm1,xmm5
+  ;     haddps xmm1,xmm1
+  ;     haddps xmm1,xmm1
+  ;     movhlps xmm1,xmm2
+  ;     addss xmm1,xmm2
   ;     addss xmm0,xmm1
   ;     jmp  cicloQuoziente6
   ; cicloQuoziente4:
-  ;    cmp [ebp+20],2*DIMREG
+  ;    cmp ebx,2*DIMREG
   ;    jl cicloResto
-  ;    sub [ebp+20],DIMREG*2
-  ;    vmovaps xmm1,[edi+edx*STEP]
-  ;    vmovaps xmm2,[esi+ecx*STEP]
+  ;    sub ebx,DIMREG*2
+  ;    movaps xmm1,[edi+edx*STEP]
+  ;    movaps xmm2,[esi+ecx*STEP]
   ;    add edx,DIMREG
   ;    add ecx,DIMREG
-  ;    vsubps  xmm1,xmm2
-  ;    vmulps xmm1,xmm1; ^2
-  ;    vmovaps xmm3,[edi+edx*STEP]
-  ;    vmovaps xmm4,[esi+ecx*STEP]
-  ;    vsubps xmm3,xmm4
-  ;    vmulps  xmm3,xmm3; ^2
-  ;    vaddps xmm1,xmm3
-  ;    vhaddps xmm1,xmm1
-  ;    vhaddps xmm1,xmm1
-  ;    vperm2f128 xmm2,xmm1,xmm1,1
-  ;    vaddss xmm1,xmm2
+  ;    subps  xmm1,xmm2
+  ;    mulps xmm1,xmm1; ^2
+  ;    movaps xmm3,[edi+edx*STEP]
+  ;    movaps xmm4,[esi+ecx*STEP]
+  ;    subps xmm3,xmm4
+  ;    mulps  xmm3,xmm3; ^2
+  ;    addps xmm1,xmm3
+  ;    haddps xmm1,xmm1
+  ;    haddps xmm1,xmm1
+  ;    movhlps xmm1,xmm2
+  ;    addss xmm1,xmm2
   ;    addss xmm0,xmm1
   ;    jmp  cicloQuoziente4
   ;  cicloQuoziente2:
-  ;   cmp [ebp+20],DIMREG
+  ;   cmp ebx,DIMREG
   ;   jl cicloResto
-  ;   vmovaps xmm1,[edi+edx*STEP]
-  ;   add rdx,DIMREG
-  ;   vmovaps xmm2,[esi+ecx*STEP]
-  ;   vsubps  xmm1,xmm2
-  ;   vmulps  xmm1,xmm1
-  ;   vhaddps xmm1,xmm1
-  ;   vhaddps xmm1,xmm1
+  ;   movaps xmm1,[edi+edx*STEP]
+  ;   add edx,DIMREG
+  ;   movaps xmm2,[esi+ecx*STEP]
+  ;   subps  xmm1,xmm2
+  ;   mulps  xmm1,xmm1
+  ;   haddps xmm1,xmm1
+  ;   haddps xmm1,xmm1
   ;   add ecx,DIMREG
-  ;   vperm2f128 xmm2,xmm1,xmm1,1
-  ;   vaddss xmm1,xmm2
+  ;   movhlps xmm1,xmm2
+  ;   addss xmm1,xmm2
   ;   addss xmm0,xmm1
-  ;   sub [ebp+20],DIMREG
+  ;   sub ebx,DIMREG
   ;   jmp  cicloQuoziente2
   ; cicloResto:
-  ;   cmp [ebp+20],0
+  ;   cmp ebx,0
   ;   je fine
-  ;   vmovss xmm1,[edi+edx*STEP]
-  ;   vmovss xmm2,[esi+ecx*STEP]
-  ;   subss xmm1,xmm2
-  ;   mulss xmm1,xmm1
-  ;   sub [ebp+20],1
-  ;   add edx,1
-  ;   add ecx, 1
-  ;   addss xmm0,xmm1
-  ;   jmp cicloResto
+    ; movss xmm1,[edi+edx*STEP]
+    ; movss xmm2,[esi+ecx*STEP]
+    ; subss xmm1,xmm2
+    ; mulss xmm1,xmm1
+    ; sub ebx,1
+    ; add edx,1
+    ; add ecx, 1
+    ; addss xmm0,xmm1
+    ; jmp cicloResto
   ; fine:
   ; sqrtps xmm0,xmm0
 ; ------------------------------------------------------------
 ; Sequenza di uscita dalla funzione
 ; ------------------------------------------------------------
-
 popaq						; ripristina i registri generali
-mov		esp, ebp			; ripristina lo Stack Pointer
+mov		ebx, ebp			; ripristina lo Stack Pointer
 pop		ebp				; ripristina il Base Pointer
 ret
+
+global dista2
+
+dista2 :

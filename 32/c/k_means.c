@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <omp.h>
 #include "time.h"
 #define	MATRIX		float*
 #define	VECTOR		int*
@@ -48,7 +47,7 @@ void free_block(void* p);
 //group GRUPPO
 //c Centroide
 //v componente del centroide
-extern int dista(MATRIX m1, MATRIX m2, int x1, int x2, int k);
+extern float dista(MATRIX m1, MATRIX m2, int x1, int x2, int k);
 extern float dista2(MATRIX m1, MATRIX m2, int x1, int x2, int k);
 //extern float* vettoreDistanze(MATRIX m1, MATRIX m2, int x1, int x2, int dim,int d,int k);
 
@@ -63,7 +62,8 @@ float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
 	return sqrtf(d);
 }
 float distanza(MATRIX m1, MATRIX m2, int x1, int x2, int k){
-	printf("%d\n",dista(m1,m1,1,1,1));
+	// printf("GIUSTA %f \n",  dist( m1,  m2,  x1,  x2,  k));
+	// printf("SBAGLIATA %d\n",  dista( 1,  2,  3,  4,  5));
 	return dista( m1,  m2,  x1,  x2,  k);
 }
 // extern float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k);
@@ -94,7 +94,6 @@ void updateNN(MATRIX ds,MATRIX centroids, MAP map,int n, int d, int m, int k, in
 	//	float* dis= get_block(sizeof(float), k);
 		int dm= (int)d/m;
 		//per ogni elemento del dataset vado a cercare quale centroide gli è più vicino
-		#pragma omp parallel for
 		for(int i=0;i<n;i++){
 			int i1=i*d+group*dm;
 			//posizione ipotetica del minimo
@@ -151,7 +150,6 @@ float calcolaDifferenza(MATRIX centroids,int d,int m, int k, int group,float* ne
 		int gdm=group*dm;
 		//per ogni centroide
 		int i=0;
-		#pragma omp parallel for
 		for(i=0;i<k;i+=8){
 			int i1=i*d+gdm;
 			int i2=i*dm;
@@ -341,7 +339,6 @@ void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, i
 	//d:numero di dimensioni di un punto del dataset
 	select_random_centroid(ds,centroids, n, d, m, k);
 
-	#pragma omp parallel for
 	for(int i=0;i<m;i++)
 			sub_k_means(ds,centroids, map, n, d, m, k,i, tmin,tmax,eps);
 	}

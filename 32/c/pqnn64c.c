@@ -45,7 +45,6 @@
 #include <string.h>
 #include <time.h>
 #include <xmmintrin.h>
-#include <omp.h>
 
 #define	MATRIX		float*
 #define	VECTOR		int*
@@ -196,8 +195,8 @@ void save_ANN(char* filename, int* ANN, int nq, int knn) {
 }
 
 
-extern void pqnn64_index(params* input);
-extern int* pqnn64_search(params* input);
+extern void pqnn32_index(params* input);
+extern int* pqnn32_search(params* input);
 
 
 /*
@@ -247,7 +246,7 @@ void pqnn_index(params* input) {
 		//
     // -------------------------------------------------
 
-    pqnn64_index(input); // Chiamata funzione assembly
+    pqnn32_index(input); // Chiamata funzione assembly
 
     // -------------------------------------------------
 
@@ -273,7 +272,7 @@ void pqnn_search(params* input) {
 		else
 		popolaANN_NEA(input->qs,input->quant2,input->map2,input->quant3,input->map3,input->res,input->ANN,input->n,input->nq,input->d,input->m,input-> kc,input-> w,input->nr,input->k,input->knn);
  		// writeANN(input-> qs,input->ANN,input-> ds,input-> nq,input->d);
-	  pqnn64_search(input); // Chiamata funzione assembly
+	  pqnn32_search(input); // Chiamata funzione assembly
 
 	// Restituisce il risultato come una matrice di nq * knn
 	// identificatori associati agli ANN approssimati delle nq query.
