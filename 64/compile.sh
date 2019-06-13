@@ -22,4 +22,4 @@ rm -f ../compiled/*
 mv * ../compiled
 cd ../compiled
 clear
-./pqnn64 ../ds/prova -noexaustive -nr 8000 -kc 8000 -k 2000 -m 128 
+./pqnn64 ../ds/prova -d

@@ -24,5 +24,5 @@ rm -f ../compiled/*
 
 mv * ../compiled
 cd ../compiled
-
-time ./pqnn32 ../ds/prova
+clear
+time ./pqnn32 ../ds/prova -d

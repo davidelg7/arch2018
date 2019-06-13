@@ -58,13 +58,10 @@ float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
 	float d=0;
 		for(int i=0;i<k;i++)
 			d=d+(m1[x1+i]-m2[x2+i])*(m1[x1+i]-m2[x2+i]);
-
 	return sqrtf(d);
 }
 float distanza(MATRIX m1, MATRIX m2, int x1, int x2, int k){
-	// printf("GIUSTA %f \n",  dist( m1,  m2,  x1,  x2,  k));
-	// printf("SBAGLIATA %d\n",  dista( 1,  2,  3,  4,  5));
-	return dista( m1,  m2,  x1,  x2,  k);
+	return 	dista( m1,  m2,  x1,  x2,  k);
 }
 // extern float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k);
 
@@ -184,7 +181,7 @@ float calcolaDifferenza2(MATRIX centroids,int d,int m, int k, int group,float* n
 		// float tot=0;
 		// MATRIX q=centroids;
 		// int dm=d/m;
-		// //per ogni centroide
+		// //pdistaer ogni centroide
 		// float* dis=vettoreDistanze(q,newCentroid,d+group*dm,dm,dm,d,k);
 		// for(int i=0;i<k;i++){
 		// 	dis[i]=sqrtf(dis[i]);
@@ -362,7 +359,7 @@ float absoluteValue(float r){
 }
 
 void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int group, int tmin,int tmax, float eps){
-	// printf("GRUPPO %d\n\n", group);
+	printf("GRUPPO %d\n\n", group);
 	for(int i=0;i<tmin;i++){
 		// printf("PASSO-%d\n",i );
 		// if(group==0)

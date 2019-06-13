@@ -63,8 +63,7 @@ float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k){
 	return sqrtf(d);
 }
 float distanza(MATRIX m1, MATRIX m2, int x1, int x2, int k){
-	return dista( m1,  m2,  x1,  x2,  k);
-}
+	return 	dista( m1,  m2,  x1,  x2,  k);}
 // extern float dist(MATRIX m1, MATRIX m2, int x1, int x2, int k);
 
 void writeCentroid(MATRIX qs,MATRIX quant,MAP map,int n,int m,int d,int k,int group, int passo);
@@ -93,7 +92,7 @@ void updateNN(MATRIX ds,MATRIX centroids, MAP map,int n, int d, int m, int k, in
 	//	float* dis= get_block(sizeof(float), k);
 		int dm= (int)d/m;
 		//per ogni elemento del dataset vado a cercare quale centroide gli è più vicino
-		#pragma omp parallel for
+		// #pragma omp parallel for
 		for(int i=0;i<n;i++){
 			int i1=i*d+group*dm;
 			//posizione ipotetica del minimo
@@ -150,7 +149,7 @@ float calcolaDifferenza(MATRIX centroids,int d,int m, int k, int group,float* ne
 		int gdm=group*dm;
 		//per ogni centroide
 		int i=0;
-		#pragma omp parallel for
+		// #pragma omp parallel for
 		for(i=0;i<k;i+=8){
 			int i1=i*d+gdm;
 			int i2=i*dm;
@@ -340,7 +339,7 @@ void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, i
 	//d:numero di dimensioni di un punto del dataset
 	select_random_centroid(ds,centroids, n, d, m, k);
 
-	#pragma omp parallel for
+	// #pragma omp parallel for
 	for(int i=0;i<m;i++)
 			sub_k_means(ds,centroids, map, n, d, m, k,i, tmin,tmax,eps);
 	}
@@ -364,7 +363,7 @@ float absoluteValue(float r){
 }
 
 void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int group, int tmin,int tmax, float eps){
-	// printf("GRUPPO %d\n\n", group);
+	printf("GRUPPO %d\n\n", group);
 	for(int i=0;i<tmin;i++){
 		// printf("PASSO-%d\n",i );
 		// if(group==0)
