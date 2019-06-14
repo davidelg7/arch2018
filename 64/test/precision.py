@@ -10,7 +10,7 @@ for x in listdir(path):
     if x.endswith(".txt"):
         onlyfiles.append(x)
 infos["files"]=onlyfiles
-lessThan=range(1,200,4)
+lessThan=range(0,800,4)
 for file in onlyfiles:
     info={}
     mean = 0;
