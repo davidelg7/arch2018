@@ -267,6 +267,7 @@ void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP 
 								trovati++;
 							}
 							else{
+								trovati++;
 								int posMax=0;
 								for(int max=0;max<knn;max++)
 									if(distanz[posMax]>distanz[max])

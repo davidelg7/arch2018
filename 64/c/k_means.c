@@ -363,7 +363,7 @@ float absoluteValue(float r){
 }
 
 void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int group, int tmin,int tmax, float eps){
-	printf("GRUPPO %d\n\n", group);
+	// printf("GRUPPO %d\n\n", group);
 	for(int i=0;i<tmin;i++){
 		// printf("PASSO-%d\n",i );
 		// if(group==0)

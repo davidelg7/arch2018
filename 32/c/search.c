@@ -168,7 +168,6 @@ void popolaANN_EA(MATRIX qs,MATRIX centroids,MAP ann,MAP map,int n, int nq, int 
 void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, int nq,int d, int m, int k,int knn){
 	int dm= d/m;
 	//Per ogni punto del queryset
-	#pragma omp parallel for
 	for(int i=0;i<nq;i++){
 		//quantizzo il punto i
 		int*q=quantize2(qs,centroids,d,m,k,i,1);
@@ -234,7 +233,6 @@ void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, i
 void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP mapPq,MATRIX residui,MAP ann,int n,int nq,int d,int m,int kc,int w,int nr,int k,int knn){
 	MATRIX dis=get_block(sizeof(float),k*k*m);
 	calcDistMatrix(centroidiPq,dis,d, m,k);
-	#pragma omp parallel for
 	for(int i=0;i<nq;i++){
 		int* id=get_block(sizeof(int),knn);
 		for(int p=0;p<knn;p++)
@@ -296,7 +294,6 @@ void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP 
 }
 
 void popolaANN_NEA(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP mapPq,MATRIX residui,MAP ann,int n,int nq,int d,int m,int kc,int w,int nr,int k,int knn){
-	#pragma omp parallel for
 	for(int i=0;i<nq;i++){
 		int* id=get_block(sizeof(int),knn);
 		for(int p=0;p<knn;p++)

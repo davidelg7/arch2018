@@ -72,7 +72,7 @@ void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, i
 void coarse(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int k, int tmin,int tmax, float eps){
   k_means(ds, centroids, map, n, d, 1, k, tmin, tmax, eps);
 }
-
+extern void diff2(MATRIX res, MATRIX ds, MATRIX quant2, int i1, int i2, int d);
 void diff(MATRIX res, MATRIX ds, MATRIX quant2, int i1, int i2, int d){
   for(int j = 0; j < d; j++)
     res[i1+j]=ds[i1+j]-quant2[i2+j];
