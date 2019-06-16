@@ -31,7 +31,7 @@ def makeMultiplePlots(name,c,files,data,n1,n2):
         fig.legend([legend])
         i+=1
         #plt.show()
-    f.savefig(path+name+".pdf", bbox_inches='tight')
+    f.savefig(path+name+"32.pdf", bbox_inches='tight')
 
 
 path=os.path.dirname(sys.argv[0])+"/"
