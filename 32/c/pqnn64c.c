@@ -498,8 +498,8 @@ int main(int argc, char** argv) {
 
 	if (!input->silent)
 		printf("\nIndexing time = %.3f secs\n", ((float)t)/CLOCKS_PER_SEC);
-	// else
-	// 	printf("%.3f\n", ((float)t)/CLOCKS_PER_SEC);
+	else
+		printf("%.3f\n", ((float)t)/CLOCKS_PER_SEC);
 
 	//
 	// Determina gli ANN
@@ -513,8 +513,8 @@ int main(int argc, char** argv) {
 
 	if (!input->silent)
 		printf("\nSearching time = %.3f secs\n", ((float)t)/CLOCKS_PER_SEC);
-	// else
-	// 	printf("%.3f\n", ((float)t)/CLOCKS_PER_SEC);
+	else
+		printf("%.3f\n", ((float)t)/CLOCKS_PER_SEC);
 
 	//
 	// Salva gli ANN
@@ -538,8 +538,15 @@ int a1[2000]={7017, 5312, 1064, 6227, 3948, 7124, 1230, 7128, 1666, 307, 4481, 2
 		int ok=0;
 		float media=0;
 		for(int i=0;i<input->nq;i++){
+			float ottimo=dist(input->qs,input->ds,i*input->d,(a[i]-1)*input->d,input->d);
+			float dMediaOttimo=0;
 			for(int j=0;j<input->knn;j++){
-				// printf("%d\t",input->ANN[i*input->knn+j] );
+			float d=dist(input->qs,input->ds,i*input->d,input->ANN[i*input->knn+j]*input->d,input->d);
+			printf("%1.3f\t",ottimo-d);
+			}
+			printf("\n");
+				for(int j=0;j<input->knn;j++){
+
 			if(a[i]-1-input->ANN[i*input->knn+j]<0.1&&input->ANN[i*input->knn+j]-a[i]-1<0.1){
 					ok++;
 					media=media+j+1;
@@ -551,9 +558,10 @@ int a1[2000]={7017, 5312, 1064, 6227, 3948, 7124, 1230, 7128, 1666, 307, 4481, 2
 						break;
 					}
 			}
-			// printf("\n" );
+
+
 		}
-			printf("%d %1.5f \n",ok,(media/ok));
+			printf("%d %1.3f\n",ok,(media/ok));
 
  		save_ANN(input->filename, input->ANN, input->nq, input->knn);
 	}

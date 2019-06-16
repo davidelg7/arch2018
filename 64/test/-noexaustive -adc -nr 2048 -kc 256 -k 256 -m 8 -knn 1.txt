@@ -1,0 +1,1 @@
+./compiled/pqnn64 ./ds/prova -noexaustive -s 1 -adc -nr 2048 -kc 256 -k 256 -m 8 -knn 1

@@ -538,10 +538,10 @@ int a1[2000]={7017, 5312, 1064, 6227, 3948, 7124, 1230, 7128, 1666, 307, 4481, 2
 		int ok=0;
 		float media=0;
 		for(int i=0;i<input->nq;i++){
-			float ottimo=dista(input->qs,input->ds,i*input->d,(a[i]-1)*input->d,input->d);
+			float ottimo=dist(input->qs,input->ds,i*input->d,(a[i]-1)*input->d,input->d);
 			float dMediaOttimo=0;
 			for(int j=0;j<input->knn;j++){
-			float d=dista(input->qs,input->ds,i*input->d,input->ANN[i*input->knn+j]*input->d,input->d);
+			float d=dist(input->qs,input->ds,i*input->d,input->ANN[i*input->knn+j]*input->d,input->d);
 			printf("%1.3f\t",ottimo-d);
 			}
 			printf("\n");
