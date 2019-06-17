@@ -234,7 +234,6 @@ void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, i
 void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP mapPq,MATRIX residui,MAP ann,int n,int nq,int d,int m,int kc,int w,int nr,int k,int knn){
 	MATRIX dis=get_block(sizeof(float),k*k*m);
 	calcDistMatrix(centroidiPq,dis,d, m,k);
-	// #pragma omp parallel for
 	for(int i=0;i<nq;i++){
 		int* id=get_block(sizeof(int),knn);
 		for(int p=0;p<knn;p++)
@@ -267,7 +266,6 @@ void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP 
 								trovati++;
 							}
 							else{
-								trovati++;
 								int posMax=0;
 								for(int max=0;max<knn;max++)
 									if(distanz[posMax]>distanz[max])
@@ -297,7 +295,6 @@ void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP 
 }
 
 void popolaANN_NEA(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP mapPq,MATRIX residui,MAP ann,int n,int nq,int d,int m,int kc,int w,int nr,int k,int knn){
-	// #pragma omp parallel for
 	for(int i=0;i<nq;i++){
 		int* id=get_block(sizeof(int),knn);
 		for(int p=0;p<knn;p++)

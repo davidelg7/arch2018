@@ -28,11 +28,11 @@ do
       for knn in 1 2 4
       do
         echo -exaustive -k $k -knn $knn -m $m $distance
-        ./compiled/pqnn64 ./ds/prova -s 1 -exaustive $distance -k $k -m $m -knn $knn | tee test/"-exaustive $distance -k $k -m $m -knn $knn.txt" &
+        ./compiled/pqnn64 ./ds/prova -s 1 -adc -exaustive $distance -k $k -m $m -knn $knn | tee test/"-exaustive $distance -k $k -m $m -knn $knn.txt" &
       done
       wait
     done
   done
 done
-python test/precision.py
-python test/plots.py
+python precision.py
+python plots.py

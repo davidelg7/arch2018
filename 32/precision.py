@@ -2,7 +2,7 @@ from os import listdir
 from os import sys
 import os
 import json
-path=os.path.dirname(sys.argv[0])+"/"
+path=os.path.dirname(sys.argv[0])+"/test/"
 onlyfiles =[]
 infos={}
 
@@ -10,7 +10,7 @@ for x in listdir(path):
     if x.endswith(".txt"):
         onlyfiles.append(x)
 infos["files"]=onlyfiles
-lessThan=range(0,800,4)
+lessThan=list(range(1,10,1))+list(range(10,800,4))
 for file in onlyfiles:
     info={}
     mean = 0;
@@ -28,13 +28,15 @@ for file in onlyfiles:
     for line in lines:
         if 0 in [float(y) for y in line.split()]:
           found+=1
+        else:
+            for x  in [abs(float(y)) for y in line.split()]:
+                mean+=x
         for word in line.split():
             error = abs(float(word))
             for e in lessThan:
                 if error<e:
                         le[e]+=1
                         break
-            mean+=float(word)
             nMeasures+=1
     less={}
     for error in le:

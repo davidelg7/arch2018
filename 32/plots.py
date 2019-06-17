@@ -27,14 +27,14 @@ def makeMultiplePlots(name,c,files,data,n1,n2):
         found=int(float(d["Found"]))
         it=int(float(d["Indexing Time"]))
         err=int(float(d["Mean Error"]))
-        legend="Searching: "+str(st)+" s\nIndexing: "+str(it)+"s \nError: "+str(err)+"\nFound: "+str(found)
+        legend="Indexing: "+str(it)+"s\nSearching: "+str(st)+" s"+"\nError: "+str(err)+"\nFound: "+str(found)
         fig.legend([legend])
         i+=1
         #plt.show()
     f.savefig(path+name+"32.pdf", bbox_inches='tight')
 
 
-path=os.path.dirname(sys.argv[0])+"/"
+path=os.path.dirname(sys.argv[0])+"/test/"
 with open(path+'runResult') as json_file:
     data = json.load(json_file)
     es=[]

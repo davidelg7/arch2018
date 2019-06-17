@@ -34,7 +34,7 @@ def makeMultiplePlots(name,c,files,data,n1,n2):
     f.savefig(path+name+"64.pdf", bbox_inches='tight')
 
 
-path=os.path.dirname(sys.argv[0])+"/"
+path=os.path.dirname(sys.argv[0])+"/test/"
 with open(path+'runResult') as json_file:
     data = json.load(json_file)
     es=[]
