@@ -51,21 +51,8 @@ typedef struct {
 	//
 
 } params;
-void stampaVettore(MATRIX f,int start,int stop);
 
-void printMatrix2(MATRIX m, MATRIX m2,MATRIX m3,MAP map,int r, int c){
-for (int i = 0; i < r; i++) {
-	printf("%d->%d\t\t",i,map[i]);
-	printf("IL VETTORE \n");
-	stampaVettore(m,i*c,i*c+c);
-	printf("E' LA DIFFERENZA DI\n");
-	stampaVettore(m2,i*c,i*c+c);
-	printf("E\n");
-	stampaVettore(m3,map[i]*c,map[i]*c+c);
 
-		printf("\n");
-	}
-}
 
 void k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int k, int tmin,int tmax, float eps);
 

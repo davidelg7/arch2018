@@ -24,12 +24,13 @@ def makeMultiplePlots(name,c,files,data,n1,n2):
         plt.title(p)
         knn= d["knn"]
         found=int(float(d["Found"]))
-        rt=int(float(d["Real Time"]))
-        cpu=int(float(d["CPU Time"]))
-        sp=int(float(d["SpeedUp"]))
-        
+        rt=float(d["Real Time"])
+        cpu=float(d["CPU Time"])
+        sp=float(d["SpeedUp"])
+        it=str(float(d["Indexing Time"]))
+        st=str(float(d["Searching Time"]))
         err=int(float(d["Mean Error"]))
-        legend="Real Time: "+str(rt)+"s\nCPU Time: "+str(cpu)+"s\nSpeedUp: "+str(sp)+"x\nError: "+str(err)+"\nFound: "+str(found)
+        legend="Real Time: "+str(rt)+"s\nCPU Time: "+str(cpu)+"s\nSpeedUp: "+str(sp)+"x\nError: "+str(err)+"\nFound: "+str(found)+"\nIndexing Time: "+it+"s\nSearching Time: "+st+" s"
         fig.legend([legend])
         i+=1
         #plt.show()

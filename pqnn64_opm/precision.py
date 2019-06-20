@@ -27,9 +27,9 @@ for file in onlyfiles:
     
     info["Real Time"]=str(rtv)[0:5]
     info["CPU Time"]=str(cpuv)[0:5]
-    info["SpeedUp"]=cpuv/rtv
-    info["Indexing Time"]=str(float(lines[0])/(cpuv/rtv))
-    info["Searching Time"]=str(float(lines[1])/(cpuv/rtv))
+    info["SpeedUp"]=str(cpuv/rtv)[0:5]
+    info["Indexing Time"]=str(float(lines[0])/(cpuv/rtv))[:4]
+    info["Searching Time"]=str(float(lines[1])/(cpuv/rtv))[:4]
     info["Total Time"]=float(lines[0])/(cpuv/rtv)+float(lines[1])/(cpuv/rtv)
     lines=lines[2:len(lines)-3]
     le={}

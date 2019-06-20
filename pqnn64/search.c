@@ -232,8 +232,8 @@ void popolaANN_ES(MATRIX qs,MATRIX centroids,MAP ann,MAP map,MATRIX dis,int n, i
 }
 
 void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP mapPq,MATRIX residui,MAP ann,int n,int nq,int d,int m,int kc,int w,int nr,int k,int knn){
-	MATRIX dis=get_block(sizeof(float),k*k*m);
-	calcDistMatrix(centroidiPq,dis,d, m,k);
+	MATRIX dis=get_block(sizeof(float),m*k*k);
+	calcDistMatrix(centroidiPq,dis,d,m,k);
 	for(int i=0;i<nq;i++){
 		int* id=get_block(sizeof(int),knn);
 		for(int p=0;p<knn;p++)
@@ -242,56 +242,46 @@ void popolaANN_NES(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP 
 		// 1 numero di gruppi del quantizatore coarse
 		int*q= quantize2(qs,coarse,d,1,kc,i,w);
 		int trovati=0;
-
 		for(int j=0;j<w;j++){
-			//quale è la quantizzazione prodotto del j-esimo centoide coarsepiù vicino a i?
-			int* q3=quantize2(residui,centroidiPq,d,m,k,q[j],1);
-
-			//per ogni punto del dataset
-			for(int p=0;p<n;p++){
-					//controlla se p è mappato dal centroide coarse q[j]
-					if(mapCoarse[p]==q[j]){
-							float dist=0;
-							//quale è la quantizzazione prodotto del p-esimo residuo?
-							int* q2=quantize2(residui,centroidiPq,d,m,k,p,1);
-							for(int g=0;g<m;g++){
-								//alla distanza aggiungo la distanza tra il centroide che mappa nel gruppo g il punto i e il centroide che mappa il gruppo g del centroide ci
-								  dist+=dis[q2[g]*k+q3[g]];
-							}
-							dist=sqrtf(dist);
-
-							if(trovati<knn){
-								id[trovati]=p;
-								distanz[trovati]=dist;
-								trovati++;
-							}
-							else{
-								int posMax=0;
-								for(int max=0;max<knn;max++)
-									if(distanz[posMax]>distanz[max])
-										posMax=max;
-								if(distanz[posMax]>dist){
-								id[posMax]=p;
-								distanz[posMax]=dist;
-							}
-						}
-							free(q2);
-						}
-			}
-			for(int p=0;p<knn;p++)
-			ann[i*knn+p]=id[p];
-			free(q3);
-
-		}
-		//a questo punto in id ho tutti i knn più vicini di i
-
+			float* df2= get_block(sizeof(float),d);
+			for(int c=0;c<d;c++)
+				df2[c]=coarse[q[j]+c]-qs[i*d+c];
+			int* ql=quantize2(df2,centroidiPq,d,m,k,0,1);
+			 for(int p=0;p<nr;p++){
+				 if(mapCoarse[p]==q[j]){
+					 float dist=0;
+					 for(int g=0;g<m;g++)
+					 		 dist+=dis[g*k*k+ql[g]*k+mapPq[p*m+g]];
+						dist=sqrtf(dist);
+	 					 if(trovati<knn){
+	 						 id[trovati]=p;
+	 						 distanz[trovati]=dist;
+	 						 trovati++;
+	 					 }
+	 					 else{
+	 						 int posMax=0;
+	 						 for(int max=0;max<knn;max++)
+	 							 if(distanz[posMax]>distanz[max])
+	 								 posMax=max;
+	 						 if(distanz[posMax]>dist){
+	 						 id[posMax]=p;
+	 						 distanz[posMax]=dist;
+	 					 }
+	 				 }
+				 }
+			 }
+			 for(int p=0;p<knn;p++)
+			 ann[i*knn+p]=id[p];
+			 free(ql);
+			 free_block(df2);
+		 }
 
 		free(q);
 		free_block(id);
 		free_block(distanz);
+
 	}
 	free_block(dis);
-
 }
 
 void popolaANN_NEA(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP mapPq,MATRIX residui,MAP ann,int n,int nq,int d,int m,int kc,int w,int nr,int k,int knn){
@@ -302,59 +292,53 @@ void popolaANN_NEA(MATRIX qs,MATRIX coarse,MAP mapCoarse,MATRIX centroidiPq,MAP 
 		float* distanz=get_block(sizeof(float),knn);
 		// 1 numero di gruppi del quantizatore coarse
 		int*q= quantize2(qs,coarse,d,1,kc,i,w);
-
 		int trovati=0;
 		for(int j=0;j<w;j++){
-			//per ogni punto del dataset
-			for(int p=0;p<n;p++){
-					//controlla se p è mappato dal centroide coarse q[j]
-					if(mapCoarse[p]==q[j]){
-							float dist=0;
-							//quale è la quantizzazione prodotto del p-esimo residuo?
-							 int* q2=quantize2(residui,centroidiPq,d,m,k,p,1);
-							//quale è la quantizzazione prodotto del j-esimo centoide più vicino a i?
-							// int* q3=quantize2(residui,centroidiPq,d,m,k,q[j],1);
-							for(int g=0;g<m;g++){
-								//alla distanza aggiungo la distanza tra il centroide che mappa nel gruppo g il punto i e il centroide che mappa il gruppo g del centroide ci
-								float*diff=get_block(sizeof(float),d/m);
-								for(int indDiff=0;indDiff<d/m;indDiff++)
-								diff[indDiff]=qs[(i*d)+(g*d/m)+indDiff]-coarse[(q[j]*d)+(g*d/m)+j];
-								 dist=dist+dista2(diff,centroidiPq,0,(q2[g]*d)+(g*(d/m)),d/m);
-								free_block(diff);
-							}
-							dist=sqrtf(dist);
+			float* df2= get_block(sizeof(float),d);
+			for(int c=0;c<d;c++)
+				df2[c]=coarse[q[j]+c]-qs[i*d+c];
 
-							if(trovati<knn){
-								id[trovati]=p;
-								distanz[trovati]=dist;
-								trovati++;
-							}
-							else{
-								int posMax=0;
-								for(int max=0;max<knn;max++)
-									if(distanz[posMax]>distanz[max])
-										posMax=max;
-								if(distanz[posMax]>dist){
-								id[posMax]=p;
-								distanz[posMax]=dist;
-							}
-						}
-							free(q2);
-							// free(q3);
-						}
-			}
-			for(int p=0;p<knn;p++)
-			ann[i*knn+p]=id[p];
-		}
-		//a questo punto in id ho tutti i knn più vicini di i
-
+				MATRIX dis2=get_block(sizeof(float),k*m);
+				for(int j=0;j<m;j++){
+		 			 int i1=j*d/m;
+		 			 for(int q=0;q<k;q++){
+		 				 int i2=q*d+j*d/m;
+		 			 		dis2[j*k+q]=dista2(df2,centroidiPq,i1,i2,d/m);
+		 		 }
+		 	 }
+			 for(int p=0;p<nr;p++){
+				 if(mapCoarse[p]==q[j]){
+					 float dist=0;
+					 for(int g=0;g<m;g++)
+					 		 dist+=dis2[g*k+mapPq[p*m+g]];
+						dist=sqrtf(dist);
+	 					 if(trovati<knn){
+	 						 id[trovati]=p;
+	 						 distanz[trovati]=dist;
+	 						 trovati++;
+	 					 }
+	 					 else{
+	 						 int posMax=0;
+	 						 for(int max=0;max<knn;max++)
+	 							 if(distanz[posMax]>distanz[max])
+	 								 posMax=max;
+	 						 if(distanz[posMax]>dist){
+	 						 id[posMax]=p;
+	 						 distanz[posMax]=dist;
+	 					 }
+	 				 }
+				 }
+			 }
+			 for(int p=0;p<knn;p++)
+			 ann[i*knn+p]=id[p];
+			 free_block(dis2);
+			 free_block(df2);
+		 }
 
 		free(q);
 		free_block(id);
 		free_block(distanz);
 	}
-	// free_block(dis);
-
 }
 
 
