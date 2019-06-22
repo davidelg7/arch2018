@@ -50,7 +50,7 @@
 #define	MATRIX		float*
 #define	VECTOR		int*
 #define MAP 			int*
-int TEST =1; //1 if testing
+int TEST =0; //1 if testing
 typedef struct {
 	char* filename; //
 	MATRIX ds; // data set
@@ -175,7 +175,6 @@ MATRIX load_data(char* filename, int *n, int *d) {
 
 	*n = rows;
 	*d = cols;
-https://cs.stanford.edu/~jure/pubs/node2vec-kdd16.pdf
 	return data;
 }
 

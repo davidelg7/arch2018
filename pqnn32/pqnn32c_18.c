@@ -49,7 +49,7 @@
 #define	MATRIX		float*
 #define	VECTOR		int*
 #define MAP 			int*
-int TEST=1;
+int TEST=0;
 typedef struct {
 	char* filename; //
 	MATRIX ds; // data set
@@ -174,7 +174,6 @@ MATRIX load_data(char* filename, int *n, int *d) {
 
 	*n = rows;
 	*d = cols;
-https://cs.stanford.edu/~jure/pubs/node2vec-kdd16.pdf
 	return data;
 }
 
@@ -236,7 +235,6 @@ void pqnn_index(params* input) {
 	if(input->exaustive==1)
 		k_means(ds, centroids, map, n, d, m, k, tmin, tmax, eps);
 	else{
-
 		coarse(ds, quant2, map2, n, d, kc, tmin, tmax, eps);
 		popolaRes(ds, map2, res, quant2, n, d, kc);
 		popolaDs2(res,ds2,map2,nr,d);
