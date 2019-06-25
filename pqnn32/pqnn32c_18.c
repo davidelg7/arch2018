@@ -304,7 +304,7 @@ int main(int argc, char** argv) {
 	input->tmax = 100;
 	input->silent = 0;
 	input->display = 0;
-	input->nr = 400;
+	input->nr = 0;
 
 	//
 	// Legge i valori dei parametri da riga comandi
@@ -445,7 +445,7 @@ int main(int argc, char** argv) {
 
 	sprintf(fname, "%s.qs", input->filename);
 	input->qs = load_data(fname, &input->nq, &input->d);
-	if(input->nr<1)
+	if(input->nr==0)
 		input->nr = input->n/20;
 
 	//
