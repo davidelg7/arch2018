@@ -390,7 +390,7 @@ void sub_k_means(MATRIX ds, MATRIX centroids, MAP map, int n, int d, int m, int 
 		float* newCentroids=mediaGeometrica(ds,centroids,map,n,d, m, k,group);
 		lastIncrement=calcolaDifferenza(centroids,d,m,k,group,newCentroids);
 
-			if(absoluteValue(lastIncrement-oldLastIncrement)/delta<eps) break;
+			if(absoluteValue(lastIncrement-oldLastIncrement)<eps) break;
 			updateCentroids(centroids,d,m,k,group,newCentroids);
 			// float increment2=calcolaDifferenza2(input,group,newCentroids);
 			// printf("Passo %d newIncrement %f\n",max, lastIncrement);

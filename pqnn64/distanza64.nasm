@@ -59,11 +59,7 @@ pushaq						; salva i registri generali
     vmulps ymm7,ymm7
     vaddps ymm1,ymm5
     vaddps ymm1,ymm7
-    vhaddps ymm1,ymm1
-    vhaddps ymm1,ymm1
-    vperm2f128 ymm2,ymm1,ymm1,1
-    vaddss xmm1,xmm2
-    addss xmm0,xmm1
+    vaddps ymm0,ymm1
     jmp  cicloQuoziente8
     cicloQuoziente6:
       cmp r8,3*DIMREG
@@ -89,11 +85,8 @@ pushaq						; salva i registri generali
       vsubps ymm5,ymm6
       vmulps ymm5,ymm5
       vaddps ymm1,ymm5
-      vhaddps ymm1,ymm1
-      vhaddps ymm1,ymm1
-      vperm2f128 ymm2,ymm1,ymm1,1
-      vaddss xmm1,xmm2
-      addss xmm0,xmm1
+      vaddps ymm0,ymm1
+
       jmp  cicloQuoziente6
   cicloQuoziente4:
      cmp r8,2*DIMREG
@@ -110,11 +103,9 @@ pushaq						; salva i registri generali
      vsubps ymm3,ymm4
      vmulps  ymm3,ymm3; ^2
      vaddps ymm1,ymm3
-     vhaddps ymm1,ymm1
-     vhaddps ymm1,ymm1
-     vperm2f128 ymm2,ymm1,ymm1,1
-     vaddss xmm1,xmm2
-     addss xmm0,xmm1
+
+     vaddps ymm0,ymm1
+
      jmp  cicloQuoziente4
    cicloQuoziente2:
     cmp r8,DIMREG
@@ -127,12 +118,16 @@ pushaq						; salva i registri generali
     vhaddps ymm1,ymm1
     vhaddps ymm1,ymm1
     add rcx,DIMREG
-    vperm2f128 ymm2,ymm1,ymm1,1
-    vaddss xmm1,xmm2
-    addss xmm0,xmm1
+    vaddps ymm0,ymm1
+
     sub r8,DIMREG
     jmp  cicloQuoziente2
   cicloResto:
+  vhaddps ymm0,ymm0
+  vhaddps ymm0,ymm0
+  vperm2f128 ymm1,ymm0,ymm0,1
+  vaddps ymm0,ymm1
+  vaddss xmm0,xmm1
     cmp r8,0
     je fine
     vmovss xmm1,[rdi+rdx*STEP]
@@ -142,7 +137,7 @@ pushaq						; salva i registri generali
     sub r8,1
     add rdx,1
     add rcx, 1
-    addss xmm0,xmm1
+    vaddss xmm0,xmm1
     jmp cicloResto
   fine:
   vsqrtps ymm0,ymm0
